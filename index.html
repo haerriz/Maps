@@ -69,12 +69,11 @@
   
   <!-- Styles -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <link rel="stylesheet" href="assets/css/styles.css" />
-  
-
-  
-
-
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/chat.css" />
+  <link rel="stylesheet" href="assets/css/desktop.css" />
+  <link rel="stylesheet" href="assets/css/tablet.css" />
+  <link rel="stylesheet" href="assets/css/mobile.css" />
   
   <!-- Preconnect for Performance -->
   <link rel="preconnect" href="https://unpkg.com" crossorigin />
@@ -87,9 +86,6 @@
   <link rel="dns-prefetch" href="//wttr.in" />
   <link rel="dns-prefetch" href="//api.aviationstack.com" />
 
-  
-
-  
   <!-- Performance Optimization -->
   <meta name="format-detection" content="telephone=no" />
   <meta name="referrer" content="origin-when-cross-origin" />
@@ -354,8 +350,6 @@
             <small class="traffic-note">Live traffic updates route colors every 1.5s</small>
           </div>
           
-
-          
           <div class="control-group">
             <label>Quick Add Locations:</label>
             <div class="chip-row">
@@ -478,6 +472,7 @@
   <script src="config/app.config.js"></script>
   
   <!-- Modular Application Scripts -->
+  <script src="assets/js/utils.js"></script>
   <script src="assets/js/map-manager.js"></script>
   <script src="assets/js/tour-manager.js"></script>
   <script src="assets/js/chat-manager.js"></script>
@@ -485,106 +480,9 @@
   <script src="assets/js/traffic-manager.js"></script>
   <script src="assets/js/weather-manager.js"></script>
   <script src="assets/js/ui-manager.js"></script>
-  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/app-manager.js"></script>
   
-  <script>
-    // Register Service Worker for offline functionality (only on HTTPS/localhost)
-    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('assets/js/sw.js')
-          .then(registration => {
-            console.log('SW registered: ', registration);
-            if (window.chatManager) {
-              window.chatManager.addMessage('📱 Offline mode enabled! Maps will work without internet.', 'ai');
-            }
-          })
-          .catch(registrationError => {
-            console.log('SW registration failed: ', registrationError);
-          });
-      });
-    }
-    
-    // Offline status detection
-    let isOffline = !navigator.onLine;
-    
-    window.addEventListener('online', () => {
-      isOffline = false;
-      if (window.chatManager) {
-        window.chatManager.addMessage('🌐 Back online! All features restored.', 'ai');
-      }
-      updateOfflineStatus();
-    });
-    
-    window.addEventListener('offline', () => {
-      isOffline = true;
-      if (window.chatManager) {
-        window.chatManager.addMessage('📱 Offline mode active. Using cached maps and data.', 'ai');
-      }
-      updateOfflineStatus();
-    });
-    
-    function updateOfflineStatus() {
-      const statusDiv = document.getElementById('offlineStatus') || createOfflineStatusDiv();
-      if (isOffline) {
-        statusDiv.style.display = 'block';
-        statusDiv.innerHTML = '📱 Offline Mode';
-      } else {
-        statusDiv.style.display = 'none';
-      }
-    }
-    
-    function createOfflineStatusDiv() {
-      const statusDiv = document.createElement('div');
-      statusDiv.id = 'offlineStatus';
-      statusDiv.style.cssText = `
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        background: #ff9800;
-        color: white;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 500;
-        z-index: 1001;
-        display: none;
-      `;
-      document.body.appendChild(statusDiv);
-      return statusDiv;
-    }
-    // Map and application initialization is now handled by modular scripts
-    
-    // All map initialization, tour management, and UI functionality
-    // is now handled by the modular JavaScript files loaded above.
-    // This provides better code organization and maintainability.
-    
-    // Legacy global variables are maintained for backward compatibility
-    // These are now managed by the respective module classes but kept for compatibility
-    let tourStops = [];
-    let markers = [];
-    let routeLine = null;
-    let trafficRouteLines = [];
-    let isJourneyStarted = false;
-    
-    // All functionality is now handled by modular JavaScript files.
-    // Functions are available through their respective manager classes.
-    
-    // Compatibility wrapper functions (if needed)
-    function sendMessage() {
-      if (window.chatManager) {
-        window.chatManager.sendMessage();
-      }
-    }
-    
-    // All other functions are now handled by the modular system
-    
-    // Initialize offline status on load
-    window.addEventListener('load', () => {
-      updateOfflineStatus();
-      if (isOffline && window.chatManager) {
-        window.chatManager.addMessage('📱 Starting in offline mode. Limited features available.', 'ai');
-      }
-    });
-  </script>
+  <!-- All JavaScript functionality is now handled by modular files -->
+  <!-- App initialization, service worker, and offline detection moved to app-manager.js -->
 </body>
 </html>   

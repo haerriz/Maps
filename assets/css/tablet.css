@@ -1,0 +1,150 @@
+/* Tablet Styles - 768px to 1023px */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .container {
+    flex-direction: row;
+  }
+
+  .sidebar {
+    width: 350px;
+    position: static;
+  }
+
+  .mobile-toggle {
+    display: none;
+  }
+
+  /* Adjusted spacing for tablet */
+  .sidebar-content {
+    padding: 12px 20px;
+  }
+
+  .control-group {
+    margin-bottom: 16px;
+  }
+
+  /* Tour Stats */
+  .tour-stats {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 14px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    font-size: 12px;
+    border-left: 4px solid #4285f4;
+    box-shadow: 0 1px 3px rgba(60,64,67,0.1);
+  }
+
+  /* Buttons - slightly smaller for tablet */
+  .btn {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+
+  .chip {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  /* AI Chat - adjusted for tablet */
+  .ai-chat-bubble {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 52px;
+    height: 52px;
+    background: #4285f4;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
+    z-index: 1001;
+    transition: transform 0.2s;
+  }
+
+  .ai-chat-popup {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 340px;
+    height: 450px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    display: none;
+    flex-direction: column;
+    z-index: 1002;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+
+  .ai-chat-popup.show {
+    display: flex;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  /* FAB */
+  .fab {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 44px;
+    height: 44px;
+    background: #34a853;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4);
+    z-index: 1001;
+    transition: transform 0.2s;
+  }
+
+  .fab .material-icons {
+    color: white;
+    font-size: 18px;
+  }
+
+  /* Map Controls */
+  .map-controls {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 1000;
+  }
+
+  .traffic-toggle {
+    background: white;
+    padding: 6px 10px;
+    border-radius: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  /* Search suggestions - adjusted for tablet */
+  .search-suggestions {
+    max-height: 250px;
+  }
+
+  .suggestion-item {
+    padding: 10px 14px;
+  }
+
+  .suggestion-text {
+    font-size: 13px;
+  }
+
+  .suggestion-btn {
+    width: 28px;
+    height: 28px;
+  }
+}
