@@ -1,0 +1,38 @@
+{
+  "name": "haerriz-trip-planner",
+  "version": "2.0.0",
+  "description": "AI-Powered Global Travel Route Optimizer with offline capabilities",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "serve": "npx serve .",
+    "build": "echo 'No build process needed for vanilla JS app'",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": [
+    "travel",
+    "trip-planner",
+    "maps",
+    "navigation",
+    "pwa",
+    "offline",
+    "route-optimization"
+  ],
+  "author": "Haerriz Technologies",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/haerriz/Maps.git"
+  },
+  "bugs": {
+    "url": "https://github.com/haerriz/Maps/issues"
+  },
+  "homepage": "https://github.com/haerriz/Maps#readme",
+  "devDependencies": {},
+  "dependencies": {},
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
