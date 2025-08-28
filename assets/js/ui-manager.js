@@ -1,462 +1,263 @@
-/**
- * UI Manager Module
- * Handles UI interactions, mobile view, and general interface functions
- */
-
+// UI Manager - User interface management
 class UIManager {
   constructor() {
-    this.isMobileView = false;
+    this.init();
+  }
+
+  init() {
     this.setupEventListeners();
-    this.setupKeyboardShortcuts();
+    this.initializeUI();
   }
 
   setupEventListeners() {
-    // Mobile toggle functionality
+    // Mobile sidebar toggle
     const mobileToggle = document.getElementById('mobileToggle');
     if (mobileToggle) {
-      mobileToggle.addEventListener('click', () => this.toggleMobileView());
+      mobileToggle.addEventListener('click', this.toggleMobileSidebar);
     }
 
-    // Chat toggle functionality
-    const aiChatBubble = document.getElementById('aiChatBubble');
-    if (aiChatBubble) {
-      aiChatBubble.addEventListener('click', () => {
-        if (window.chatManager) {
-          window.chatManager.toggleAIChat();
+    // Form submissions
+    const searchInput = document.getElementById('startLocation');
+    if (searchInput) {
+      searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          this.handleSearch();
         }
       });
     }
 
-    // Quick message buttons
-    document.addEventListener('click', (e) => {
-      if (e.target.classList.contains('suggestion-chip')) {
-        const message = e.target.textContent;
-        if (window.chatManager) {
-          window.chatManager.sendQuickMessage(message);
-        }
+    // Travel mode changes
+    const travelMode = document.getElementById('travelMode');
+    if (travelMode) {
+      travelMode.addEventListener('change', this.handleTravelModeChange);
+    }
+
+    // Preference checkboxes
+    this.setupPreferenceListeners();
+  }
+
+  setupPreferenceListeners() {
+    const preferences = ['includeBreaks', 'includeFood', 'includeFuel'];
+    preferences.forEach(prefId => {
+      const element = document.getElementById(prefId);
+      if (element) {
+        element.addEventListener('change', () => {
+          this.updatePreferences();
+        });
       }
     });
   }
 
-  setupKeyboardShortcuts() {
-    document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey || e.metaKey) {
-        switch(e.key) {
-          case 's':
-            e.preventDefault();
-            if (window.tourManager) {
-              window.tourManager.exportTour();
-            }
-            break;
-          case 'r':
-            e.preventDefault();
-            const tourStops = window.tourManager ? window.tourManager.getTourStops() : [];
-            if (tourStops.length >= 2) {
-              window.tourManager.drawRealRoute();
-            }
-            break;
-        }
-      }
-    });
+  initializeUI() {
+    // Set default date and time
+    this.setDefaultDateTime();
+    
+    // Update initial stats
+    this.updateTourStats();
+    
+    // Initialize mobile view
+    this.handleMobileView();
   }
 
-  toggleMobileView() {
-    this.isMobileView = !this.isMobileView;
-    const sidebar = document.querySelector('.sidebar');
-    const mobileToggle = document.getElementById('mobileToggle');
-    
-    if (this.isMobileView) {
-      sidebar.classList.add('mobile-open');
-      mobileToggle.textContent = '🗺️ Map';
-    } else {
-      sidebar.classList.remove('mobile-open');
-      mobileToggle.textContent = '📍 Map';
-    }
-  }
-
-  updateTravelMode() {
-    const mode = document.getElementById('travelMode')?.value;
-    if (!mode) return;
-    
-    let modeEmoji = '🚗';
-    switch(mode) {
-      case 'walking': modeEmoji = '🚶'; break;
-      case 'cycling': modeEmoji = '🚴'; break;
-      case 'transit': modeEmoji = '🚌'; break;
-      case 'mixed': modeEmoji = '🔄'; break;
-    }
-    
-    // Hide traffic toggle for non-driving modes
-    const trafficToggle = document.getElementById('trafficToggle')?.parentElement?.parentElement;
-    if (trafficToggle) {
-      if (mode === 'driving') {
-        trafficToggle.style.display = 'block';
-      } else {
-        trafficToggle.style.display = 'none';
-        const trafficCheckbox = document.getElementById('trafficToggle');
-        if (trafficCheckbox) {
-          trafficCheckbox.checked = false;
-          this.updateTrafficMode();
-        }
-      }
-    }
-    
-    // Show transport information for transit mode
-    if (mode === 'transit' && window.tourManager && window.tourManager.getTourStops().length >= 2) {
-      if (window.transportManager) {
-        window.transportManager.showTransportOptions();
-      }
-    } else {
-      const transportInfo = document.getElementById('transportInfo');
-      if (transportInfo) {
-        transportInfo.style.display = 'none';
-      }
-    }
-    
-    // Redraw routes with updated mode
-    if (window.tourManager && window.tourManager.getTourStops().length > 1) {
-      window.tourManager.drawRealRoute();
-    }
-    
-    if (window.chatManager) {
-      window.chatManager.addMessage(`🔄 Travel mode updated to ${modeEmoji} ${mode}! This will optimize your route planning and time estimates.`, 'ai');
-    }
-  }
-
-  updateTrafficMode() {
-    const trafficEnabled = document.getElementById('trafficToggle')?.checked;
-    const mapTrafficToggle = document.getElementById('mapTrafficToggle');
-    const statusSpan = document.getElementById('trafficStatus');
-    
-    // Sync both toggles
-    if (mapTrafficToggle) {
-      mapTrafficToggle.checked = trafficEnabled;
-    }
-    
-    if (statusSpan) {
-      if (trafficEnabled) {
-        statusSpan.textContent = 'On';
-        statusSpan.style.color = '#28a745';
-        if (window.chatManager) {
-          window.chatManager.addMessage('🚗 Traffic enabled! Routes show real-time conditions.', 'ai');
-        }
-      } else {
-        statusSpan.textContent = 'Off';
-        statusSpan.style.color = '#6c757d';
-        if (window.chatManager) {
-          window.chatManager.addMessage('🚗 Traffic disabled. Standard route display.', 'ai');
-        }
-      }
-    }
-    
-    // Redraw route with traffic settings
-    if (window.tourManager && window.tourManager.getTourStops().length >= 2) {
-      window.tourManager.drawRealRoute();
-    }
-  }
-
-  setStartTime(when) {
+  setDefaultDateTime() {
+    const now = new Date();
     const timeInput = document.getElementById('startTime');
     const dateInput = document.getElementById('startDate');
     
-    if (when === 'now' && timeInput && dateInput) {
-      const now = new Date();
+    if (timeInput) {
       timeInput.value = now.toTimeString().slice(0, 5);
+    }
+    if (dateInput) {
       dateInput.value = now.toISOString().slice(0, 10);
-      if (window.chatManager) {
-        window.chatManager.addMessage('🕐 Journey start time set to now! This will help optimize transport schedules and suggest appropriate breaks.', 'ai');
+    }
+  }
+
+  toggleMobileSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) {
+      sidebar.classList.toggle('mobile-open');
+    }
+  }
+
+  handleSearch() {
+    const query = document.getElementById('startLocation')?.value;
+    if (query && window.searchManager) {
+      window.searchManager.performSearch(query);
+    }
+  }
+
+  handleTravelModeChange() {
+    const mode = document.getElementById('travelMode')?.value;
+    console.log('Travel mode changed to:', mode);
+    
+    // Update route type display
+    const routeType = document.getElementById('routeType');
+    if (routeType) {
+      const modeNames = {
+        driving: 'Driving',
+        walking: 'Walking',
+        cycling: 'Cycling',
+        transit: 'Transit',
+        mixed: 'Mixed'
+      };
+      routeType.textContent = modeNames[mode] || 'Direct';
+    }
+  }
+
+  updatePreferences() {
+    const preferences = {
+      breaks: document.getElementById('includeBreaks')?.checked,
+      food: document.getElementById('includeFood')?.checked,
+      fuel: document.getElementById('includeFuel')?.checked
+    };
+    
+    console.log('Preferences updated:', preferences);
+  }
+
+  updateTourStats() {
+    const stops = window.tourManager?.getTourStops() || [];
+    
+    const totalStops = document.getElementById('totalStops');
+    if (totalStops) {
+      totalStops.textContent = stops.length;
+    }
+    
+    // Distance will be updated when route is calculated
+    this.updateStopsList(stops);
+  }
+
+  updateStopsList(stops) {
+    const stopsList = document.getElementById('stopsList');
+    if (!stopsList) return;
+
+    if (stops.length === 0) {
+      stopsList.innerHTML = '<p class="empty-stops">Click on the map to add stops</p>';
+      return;
+    }
+
+    const stopsHtml = stops.map((stop, index) => `
+      <div class="stop-item" style="display: flex; justify-content: space-between; align-items: center; padding: 8px; margin: 4px 0; background: #f8f9fa; border-radius: 6px;">
+        <span style="flex: 1; font-size: 13px;">${stop.name || `Stop ${index + 1}`}</span>
+        <button onclick="window.tourManager.removeStop(${index})" style="background: #ea4335; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer;">Remove</button>
+      </div>
+    `).join('');
+
+    stopsList.innerHTML = stopsHtml;
+  }
+
+  showTransportInfo(transportData) {
+    const transportInfo = document.getElementById('transportInfo');
+    const transportDetails = document.getElementById('transportDetails');
+    
+    if (transportInfo && transportDetails && transportData) {
+      transportDetails.innerHTML = `
+        <div style="font-size: 12px; line-height: 1.4;">
+          <p><strong>Duration:</strong> ${transportData.duration || 'Calculating...'}</p>
+          <p><strong>Distance:</strong> ${transportData.distance || 'Calculating...'}</p>
+          <p><strong>Mode:</strong> ${transportData.mode || 'Mixed'}</p>
+        </div>
+      `;
+      transportInfo.style.display = 'block';
+    }
+  }
+
+  hideTransportInfo() {
+    const transportInfo = document.getElementById('transportInfo');
+    if (transportInfo) {
+      transportInfo.style.display = 'none';
+    }
+  }
+
+  showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${type === 'error' ? '#ea4335' : '#34a853'};
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      z-index: 10000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 3000);
+  }
+
+  handleMobileView() {
+    // Handle mobile-specific UI adjustments
+    if (window.innerWidth <= 768) {
+      const sidebar = document.querySelector('.sidebar');
+      if (sidebar) {
+        sidebar.classList.remove('mobile-open');
       }
     }
   }
 
-  useMyLocation() {
-    if (!navigator.geolocation) {
-      if (window.chatManager) {
-        window.chatManager.addMessage('❌ Geolocation is not supported by this browser.', 'ai');
+  // Update UI when tour changes
+  onTourUpdate() {
+    this.updateTourStats();
+  }
+
+  // Update UI when route is calculated
+  onRouteCalculated(routeData) {
+    if (routeData) {
+      const totalDistance = document.getElementById('totalDistance');
+      if (totalDistance && routeData.distance) {
+        totalDistance.textContent = Utils.formatDistance(routeData.distance);
       }
-      return;
-    }
-    
-    // Request permission explicitly for mobile devices
-    if (navigator.permissions) {
-      navigator.permissions.query({name: 'geolocation'}).then((result) => {
-        if (result.state === 'denied') {
-          if (window.chatManager) {
-            window.chatManager.addMessage('❌ Location access denied. Please enable location permissions in your browser settings:\n\n📱 Mobile: Settings > Browser > Location > Allow\n💻 Desktop: Click the location icon in address bar', 'ai');
-          }
-          return;
-        } else if (result.state === 'prompt') {
-          if (window.chatManager) {
-            window.chatManager.addMessage('📍 Please allow location access when prompted by your browser.', 'ai');
-          }
-        }
-        this.startLocationProcess();
-      }).catch(() => {
-        // Fallback if permissions API not supported
-        this.startLocationProcess();
+      
+      this.showTransportInfo({
+        duration: Utils.formatDuration(routeData.duration),
+        distance: Utils.formatDistance(routeData.distance),
+        mode: document.getElementById('travelMode')?.value || 'driving'
       });
-    } else {
-      this.startLocationProcess();
-    }
-  }
-
-  startLocationProcess() {
-    if (window.chatManager) {
-      window.chatManager.addMessage('🎯 Getting high-precision GPS location...', 'ai');
-    }
-    
-    const gpsOptions = {
-      enableHighAccuracy: true,
-      timeout: 30000,
-      maximumAge: 0
-    };
-    
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        const accuracy = Math.round(position.coords.accuracy || 0);
-        
-        if (window.mapManager) {
-          window.mapManager.getMap().setView([lat, lng], 16);
-        }
-        
-        const accuracyStatus = accuracy < 10 ? '🎯 Excellent' : accuracy < 30 ? '✅ Good' : accuracy < 100 ? '⚠️ Fair' : '❌ Poor';
-        if (window.chatManager) {
-          window.chatManager.addMessage(`${accuracyStatus} Located! Accuracy: ±${accuracy}m`, 'ai');
-        }
-      },
-      (error) => {
-        this.handleLocationError(error);
-      },
-      gpsOptions
-    );
-  }
-
-  handleLocationError(error) {
-    let message = '❌ Location access failed: ';
-    switch(error.code) {
-      case error.PERMISSION_DENIED:
-        message += 'Permission denied. Please enable location access in your browser settings.';
-        break;
-      case error.POSITION_UNAVAILABLE:
-        message += 'Location information unavailable. Please check your GPS/network connection.';
-        break;
-      case error.TIMEOUT:
-        message += 'Location request timed out. Please try again.';
-        break;
-      default:
-        message += 'Unknown error occurred.';
-        break;
-    }
-    
-    if (window.chatManager) {
-      window.chatManager.addMessage(message, 'ai');
-    }
-  }
-
-  addCurrentLocationAsStop() {
-    if (!navigator.geolocation) {
-      if (window.chatManager) {
-        window.chatManager.addMessage('❌ Geolocation is not supported by this browser. Please add locations manually.', 'ai');
-      }
-      return;
-    }
-    
-    if (window.chatManager) {
-      window.chatManager.addMessage('📍 Getting high-precision GPS location for tour stop...', 'ai');
-    }
-    
-    const gpsOptions = {
-      enableHighAccuracy: true,
-      timeout: 25000,
-      maximumAge: 0
-    };
-    
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        const accuracy = Math.round(position.coords.accuracy || 0);
-        
-        try {
-          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-          const data = await response.json();
-          
-          const locationName = data.display_name ? 
-            data.display_name.split(',')[0] || 'Current Location' : 
-            'Current Location';
-          
-          if (window.tourManager) {
-            window.tourManager.addTourStop({lat, lng}, locationName);
-            
-            const accuracyStatus = accuracy < 10 ? '🎯 Excellent' : accuracy < 30 ? '✅ Good' : accuracy < 100 ? '⚠️ Fair' : '❌ Poor';
-            if (window.chatManager) {
-              window.chatManager.addMessage(`${accuracyStatus} Added your current location (${locationName}) as tour stop #${window.tourManager.getTourStops().length}! GPS Accuracy: ±${accuracy}m`, 'ai');
-            }
-            
-            const zoom = accuracy < 10 ? 18 : accuracy < 30 ? 17 : accuracy < 100 ? 16 : 15;
-            if (window.mapManager) {
-              window.mapManager.getMap().setView([lat, lng], zoom);
-            }
-          }
-        } catch (error) {
-          if (window.tourManager) {
-            window.tourManager.addTourStop({lat, lng}, 'Current Location');
-            const accuracyStatus = accuracy < 10 ? '🎯 Excellent' : accuracy < 30 ? '✅ Good' : accuracy < 100 ? '⚠️ Fair' : '❌ Poor';
-            if (window.chatManager) {
-              window.chatManager.addMessage(`${accuracyStatus} Added your current location as tour stop #${window.tourManager.getTourStops().length}! GPS Accuracy: ±${accuracy}m`, 'ai');
-            }
-            if (window.mapManager) {
-              window.mapManager.getMap().setView([lat, lng], 16);
-            }
-          }
-        }
-      },
-      (error) => {
-        this.handleLocationError(error);
-      },
-      gpsOptions
-    );
-  }
-
-  cacheCurrentArea() {
-    if (window.mapManager) {
-      window.mapManager.preloadTilesForArea();
-    }
-  }
-
-  startJourney() {
-    const tourStops = window.tourManager ? window.tourManager.getTourStops() : [];
-    if (tourStops.length === 0) {
-      if (window.chatManager) {
-        window.chatManager.addMessage('❌ Please add some tour stops before starting your journey!', 'ai');
-      }
-      return;
-    }
-    
-    if (!navigator.geolocation) {
-      if (window.chatManager) {
-        window.chatManager.addMessage('❌ GPS tracking is not supported by this browser.', 'ai');
-      }
-      return;
-    }
-    
-    if (window.chatManager) {
-      window.chatManager.addMessage('🚀 Starting journey! This would begin GPS navigation with turn-by-turn directions.', 'ai');
-    }
-  }
-
-  // Quick add location functions for chips
-  quickAddLocation(locationName) {
-    if (window.searchManager) {
-      window.searchManager.quickAddLocation(locationName);
     }
   }
 }
 
-// Global functions for backward compatibility
+// Global UI functions for compatibility
 function toggleMobileView() {
   if (window.uiManager) {
-    window.uiManager.toggleMobileView();
+    window.uiManager.toggleMobileSidebar();
   }
 }
 
-function updateTravelMode() {
-  if (window.uiManager) {
-    window.uiManager.updateTravelMode();
-  }
-}
-
-function updateTrafficMode() {
-  if (window.uiManager) {
-    window.uiManager.updateTrafficMode();
-  }
-}
-
-function setStartTime(when) {
-  if (window.uiManager) {
-    window.uiManager.setStartTime(when);
-  }
-}
-
-function useMyLocation() {
-  if (window.uiManager) {
-    window.uiManager.useMyLocation();
-  }
-}
-
-function addCurrentLocationAsStop() {
-  if (window.uiManager) {
-    window.uiManager.addCurrentLocationAsStop();
-  }
-}
-
-function cacheCurrentArea() {
-  if (window.uiManager) {
-    window.uiManager.cacheCurrentArea();
-  }
-}
-
-function startJourney() {
-  if (window.uiManager) {
-    window.uiManager.startJourney();
-  }
-}
-
-function clearTour() {
-  if (window.tourManager) {
-    window.tourManager.clearTour();
-  }
-}
-
-function exportTour() {
-  if (window.tourManager) {
-    window.tourManager.exportTour();
-  }
-}
-
-function getWeatherInfo() {
-  if (window.weatherManager) {
-    window.weatherManager.getWeatherInfo();
-  }
-}
-
-function quickAddLocation(locationName) {
-  if (window.uiManager) {
-    window.uiManager.quickAddLocation(locationName);
-  }
-}
-
-function searchLocation() {
-  if (window.searchManager) {
-    window.searchManager.searchLocation();
-  }
-}
-
-function searchAndAddStop() {
-  if (window.searchManager) {
-    window.searchManager.searchAndAddStop();
-  }
-}
-
-function toggleAIChat() {
-  if (window.chatManager) {
-    window.chatManager.toggleAIChat();
-  }
-}
-
-function sendMessage() {
-  if (window.chatManager) {
-    window.chatManager.sendMessage();
-  }
-}
-
-function sendQuickMessage(message) {
-  if (window.chatManager) {
-    window.chatManager.sendQuickMessage(message);
+function toggleMobileSheet() {
+  const sidebar = document.querySelector('.sidebar');
+  if (sidebar) {
+    sidebar.classList.toggle('mobile-expanded');
   }
 }
 
 // Initialize UI manager
-window.uiManager = new UIManager();
+window.addEventListener('DOMContentLoaded', () => {
+  window.uiManager = new UIManager();
+  
+  // Listen for tour updates
+  if (window.tourManager) {
+    const originalAddStop = window.tourManager.addStop.bind(window.tourManager);
+    const originalRemoveStop = window.tourManager.removeStop.bind(window.tourManager);
+    
+    window.tourManager.addStop = function(latlng) {
+      originalAddStop(latlng);
+      window.uiManager.onTourUpdate();
+    };
+    
+    window.tourManager.removeStop = function(index) {
+      originalRemoveStop(index);
+      window.uiManager.onTourUpdate();
+    };
+  }
+});

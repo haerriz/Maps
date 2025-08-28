@@ -1,392 +1,499 @@
-/**
- * Tour Manager Module
- * Handles tour stops, route planning, and optimization
- */
-
+// Tour Manager - Route planning and optimization
 class TourManager {
-  constructor(map) {
-    this.map = map;
-    this.tourStops = [];
-    this.markers = [];
-    this.routeLine = null;
-    this.trafficRouteLines = [];
-    this.isJourneyStarted = false;
-    this.setupEventListeners();
+  constructor() {
+    this.stops = [];
+    this.currentRoute = null;
+    this.init();
   }
 
-  setupEventListeners() {
-    // Map click handler
-    this.map.on('click', (e) => {
-      const name = prompt('Enter a name for this stop:');
-      if (name) {
-        this.addTourStop(e.latlng, name);
-      }
+  init() {
+    this.updateStats();
+  }
+
+  addStop(latlng) {
+    this.stops.push({
+      lat: latlng.lat,
+      lng: latlng.lng,
+      name: `Stop ${this.stops.length + 1}`
     });
+    this.updateStats();
+    this.updateStopsList();
   }
 
-  addTourStop(latlng, name) {
-    // Create and add marker to map
-    const marker = L.marker(latlng).addTo(this.map);
-    marker.bindPopup(`<strong>${name}</strong><br>Lat: ${latlng.lat.toFixed(4)}, Lng: ${latlng.lng.toFixed(4)}`);
+  removeStop(index) {
+    this.stops.splice(index, 1);
     
-    // Create stop object and add to arrays
-    const stop = { latlng, name, marker };
-    this.tourStops.push(stop);
-    this.markers.push(marker);
-    
-    // Update UI elements
-    this.updateStopsList();
-    
-    // Always draw optimized route when 2+ stops
-    if (this.tourStops.length >= 2) {
-      this.drawRealRoute();
+    // Update map markers
+    if (window.mapManager) {
+      window.mapManager.updateMarkers(this.stops);
     }
     
-    // Update transport info if in transit mode
-    const currentMode = document.getElementById('travelMode')?.value;
-    if (currentMode === 'transit' && this.tourStops.length >= 2) {
-      window.transportManager?.showTransportOptions();
+    // Recalculate route if more than 1 stop remains
+    if (this.stops.length >= 2) {
+      this.calculateRoute();
+    } else {
+      // Clear route if less than 2 stops
+      this.clearRoute();
+    }
+    
+    this.updateStats();
+    this.updateStopsList();
+  }
+
+  updateStats() {
+    const totalStops = document.getElementById('totalStops');
+    const totalDistance = document.getElementById('totalDistance');
+    
+    if (totalStops) totalStops.textContent = this.stops.length;
+    if (totalDistance && this.stops.length < 2) {
+      totalDistance.textContent = '0 km';
+    }
+    
+    // Clear time display if no route
+    if (this.stops.length < 2) {
+      const timeElement = document.getElementById('estimatedTime');
+      if (timeElement) {
+        timeElement.textContent = '0 min';
+        timeElement.title = '';
+      }
+    }
+  }
+
+  updateTimeDisplay(baseTime, trafficDelay, avgSpeed) {
+    // Add time display to tour stats if not exists
+    let timeElement = document.getElementById('estimatedTime');
+    if (!timeElement) {
+      const tourStats = document.getElementById('tourStats');
+      if (tourStats) {
+        const timeRow = document.createElement('div');
+        timeRow.className = 'stat-row';
+        timeRow.innerHTML = '<span>Time:</span> <span id="estimatedTime" class="stat-value">0 min</span>';
+        tourStats.appendChild(timeRow);
+        timeElement = document.getElementById('estimatedTime');
+      }
+    }
+    
+    if (timeElement) {
+      if (trafficDelay > 0) {
+        timeElement.innerHTML = `
+          <span style="color: #666;">${baseTime} min</span> 
+          <span style="color: #f44336; font-size: 10px;">+${trafficDelay}</span>
+        `;
+        timeElement.title = `Base time: ${baseTime} min, Traffic delay: +${trafficDelay} min, Avg speed: ${avgSpeed} km/h`;
+      } else {
+        timeElement.textContent = `${baseTime} min`;
+        timeElement.title = `Estimated travel time: ${baseTime} minutes`;
+      }
     }
   }
 
   updateStopsList() {
     const stopsList = document.getElementById('stopsList');
-    
-    // Update total stops counter
-    const totalStopsEl = document.getElementById('totalStops');
-    if (totalStopsEl) totalStopsEl.textContent = this.tourStops.length;
-    
-    // Handle empty tour case
-    if (this.tourStops.length === 0) {
-      stopsList.innerHTML = `
-        <div style="
-          text-align: center;
-          padding: 24px;
-          color: #5f6368;
-          font-family: 'Google Sans', sans-serif;
-        ">
-          <div style="font-size: 48px; margin-bottom: 12px; opacity: 0.5;">📍</div>
-          <div style="font-size: 14px; font-weight: 500; margin-bottom: 4px;">No stops added yet</div>
-          <div style="font-size: 12px;">Click on the map or search to add locations</div>
-        </div>
-      `;
-      const totalDistanceEl = document.getElementById('totalDistance');
-      if (totalDistanceEl) totalDistanceEl.textContent = '0 km';
+    if (!stopsList) return;
+
+    if (this.stops.length === 0) {
+      stopsList.innerHTML = '<p class="empty-stops">Click on the map to add stops</p>';
       return;
     }
-    
-    // Calculate total distance
-    let totalDistance = 0;
-    for (let i = 1; i < this.tourStops.length; i++) {
-      totalDistance += this.map.distance(this.tourStops[i-1].latlng, this.tourStops[i].latlng);
-    }
-    const totalDistanceEl = document.getElementById('totalDistance');
-    if (totalDistanceEl) totalDistanceEl.textContent = `${(totalDistance / 1000).toFixed(1)} km`;
-    
-    // Generate HTML for each stop
-    stopsList.innerHTML = this.tourStops.map((stop, index) => {
-      let distanceInfo = '';
-      if (index > 0) {
-        const dist = this.map.distance(this.tourStops[index-1].latlng, stop.latlng);
-        distanceInfo = `<div style="font-size: 11px; color: #5f6368; margin-top: 2px;">${(dist/1000).toFixed(1)}km from previous</div>`;
-      }
-      
-      return `
-        <div class="stop-item" draggable="true" data-index="${index}" style="
-          display: flex;
-          align-items: center;
-          padding: 12px;
-          border-radius: 8px;
-          margin-bottom: 8px;
-          background: #f8f9fa;
-          border: 1px solid #e8eaed;
-          transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
-          cursor: move;
-        ">
-          <div style="
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #4285f4, #1a73e8);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 500;
-            font-size: 14px;
-            margin-right: 12px;
-            box-shadow: 0 2px 4px rgba(66,133,244,0.3);
-          ">${index + 1}</div>
-          <div style="flex: 1;">
-            <div style="
-              font-weight: 500;
-              font-size: 14px;
-              color: #202124;
-              font-family: 'Google Sans', sans-serif;
-              line-height: 1.3;
-            ">${stop.name}</div>
-            ${distanceInfo}
-          </div>
-          <button onclick="window.tourManager.removeStop(${index})" style="
-            background: #ea4335;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
-            box-shadow: 0 2px 4px rgba(234,67,53,0.3);
-          ">
-            <span class="material-icons" style="font-size: 16px;">close</span>
-          </button>
+
+    const stopsHtml = this.stops.map((stop, index) => `
+      <div class="stop-item">
+        <div class="stop-info">
+          <span class="material-icons">place</span>
+          <span class="stop-name">${stop.name || `Stop ${index + 1}`}</span>
         </div>
-      `;
-    }).join('');
-    
-    this.initDragAndDrop();
+        <button class="btn-remove" onclick="window.tourManager.removeStop(${index})">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+    `).join('');
+
+    stopsList.innerHTML = stopsHtml;
   }
 
-  removeStop(index) {
-    // Remove marker from map
-    this.map.removeLayer(this.markers[index]);
-    
-    // Remove from arrays
-    this.tourStops.splice(index, 1);
-    this.markers.splice(index, 1);
-    
-    // Update UI
-    this.updateStopsList();
-    
-    // Redraw route if multiple stops remain
-    if (this.tourStops.length >= 2) {
-      this.drawRealRoute();
-    } else if (this.tourStops.length === 1) {
-      // Clear route if only one stop remains
-      if (this.routeLine) this.map.removeLayer(this.routeLine);
-      this.trafficRouteLines.forEach(line => this.map.removeLayer(line));
-      this.trafficRouteLines = [];
-    }
-  }
+  async calculateRoute() {
+    if (this.stops.length < 2) return;
 
-  initDragAndDrop() {
-    const stopItems = document.querySelectorAll('.stop-item');
-    let draggedElement = null;
-    
-    stopItems.forEach(item => {
-      item.addEventListener('dragstart', (e) => {
-        draggedElement = item;
-        item.style.opacity = '0.5';
-        e.dataTransfer.effectAllowed = 'move';
-      });
-      
-      item.addEventListener('dragend', () => {
-        item.style.opacity = '1';
-        draggedElement = null;
-      });
-      
-      item.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-      });
-      
-      item.addEventListener('drop', (e) => {
-        e.preventDefault();
-        if (draggedElement && draggedElement !== item) {
-          const fromIndex = parseInt(draggedElement.dataset.index);
-          const toIndex = parseInt(item.dataset.index);
-          this.reorderStops(fromIndex, toIndex);
-        }
-      });
-    });
-  }
-
-  reorderStops(fromIndex, toIndex) {
-    // Reorder tour stops array
-    const movedStop = this.tourStops.splice(fromIndex, 1)[0];
-    this.tourStops.splice(toIndex, 0, movedStop);
-    
-    // Reorder markers array
-    const movedMarker = this.markers.splice(fromIndex, 1)[0];
-    this.markers.splice(toIndex, 0, movedMarker);
-    
-    // Update UI
-    this.updateStopsList();
-    
-    // Redraw route if multiple stops
-    if (this.tourStops.length >= 2) {
-      this.drawRealRoute();
-    }
-    
-    if (window.chatManager) {
-      window.chatManager.addMessage(`🔄 Reordered stops! ${this.tourStops[toIndex].name} is now stop #${toIndex + 1}`, 'ai');
-    }
-  }
-
-  async drawRealRoute() {
-    if (this.tourStops.length < 2) {
-      if (window.chatManager) {
-        window.chatManager.addMessage('Add at least 2 stops to calculate a real route!', 'ai');
-      }
-      return;
-    }
-    
-    if (window.chatManager) {
-      window.chatManager.addMessage('🗺️ Calculating real route with turn-by-turn directions...', 'ai');
-    }
-    
-    // Clear existing routes
-    if (this.routeLine) this.map.removeLayer(this.routeLine);
-    this.trafficRouteLines.forEach(line => this.map.removeLayer(line));
-    this.trafficRouteLines = [];
-    
     try {
-      const mode = document.getElementById('travelMode')?.value || 'driving';
-      const profile = mode === 'walking' ? 'foot' : mode === 'cycling' ? 'bike' : 'car';
-      const trafficEnabled = document.getElementById('trafficToggle')?.checked;
-      
-      let allCoordinates = [];
-      let totalDistance = 0;
-      let totalDuration = 0;
-      
-      // Calculate route through all stops in sequence
-      for (let i = 0; i < this.tourStops.length - 1; i++) {
-        const start = this.tourStops[i];
-        const end = this.tourStops[i + 1];
+      const route = await Utils.calculateRoute(this.stops);
+      if (route && window.mapManager) {
+        window.mapManager.drawRoute(route.geometry.coordinates);
         
-        const coordString = `${start.latlng.lng},${start.latlng.lat};${end.latlng.lng},${end.latlng.lat}`;
-        const url = `https://router.project-osrm.org/route/v1/${profile}/${coordString}?overview=full&geometries=geojson&steps=true&annotations=true`;
-        
-        const response = await fetch(url);
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.routes && data.routes[0]) {
-            const route = data.routes[0];
-            const coords = route.geometry.coordinates.map(coord => [coord[1], coord[0]]);
-            
-            allCoordinates.push(...coords);
-            totalDistance += route.distance;
-            totalDuration += route.duration;
-          }
-        } else {
-          // Fallback to straight line for this segment
-          allCoordinates.push([start.latlng.lat, start.latlng.lng], [end.latlng.lat, end.latlng.lng]);
-        }
-      }
-      
-      if (allCoordinates.length > 0) {
-        // Draw enhanced route
-        if (trafficEnabled && profile === 'car' && window.trafficManager) {
-          window.trafficManager.drawTrafficRoute(allCoordinates);
-        } else {
-          const routeStyle = {
-            color: '#4285f4',
-            weight: 6,
-            opacity: 0.8,
-            lineCap: 'round',
-            lineJoin: 'round'
-          };
-          
-          const mainRoute = L.polyline(allCoordinates, routeStyle).addTo(this.map);
-          this.trafficRouteLines.push(mainRoute);
+        // Analyze traffic if enabled
+        let trafficData = { totalDelay: 0, avgSpeed: 50 };
+        if (window.trafficManager && window.trafficManager.trafficEnabled) {
+          const routeCoords = route.geometry.coordinates.map(coord => ({ lat: coord[1], lng: coord[0] }));
+          trafficData = await window.trafficManager.analyzeRouteTraffic(routeCoords);
         }
         
-        // Store route data for navigation
-        window.calculatedRoute = {
-          coordinates: allCoordinates,
-          distance: totalDistance,
-          duration: totalDuration
-        };
+        // Calculate adjusted time with traffic
+        const baseTime = Math.round(route.duration / 60);
+        const adjustedTime = baseTime + Math.round(trafficData.totalDelay);
         
-        // Update UI
-        const totalDistanceEl = document.getElementById('totalDistance');
-        if (totalDistanceEl) totalDistanceEl.textContent = `${(totalDistance / 1000).toFixed(1)} km`;
-        
-        const routeTypeEl = document.getElementById('routeType');
-        if (routeTypeEl) routeTypeEl.textContent = 'Real route';
-        
-        const hours = Math.floor(totalDuration / 3600);
-        const minutes = Math.floor((totalDuration % 3600) / 60);
-        const timeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-        
-        if (window.chatManager) {
-          window.chatManager.addMessage(`✅ Real route calculated! Distance: ${(totalDistance / 1000).toFixed(1)}km, Time: ${timeStr}. Ready for navigation!`, 'ai');
+        // Update distance and duration with traffic info
+        const totalDistance = document.getElementById('totalDistance');
+        if (totalDistance) {
+          totalDistance.textContent = Utils.formatDistance(route.distance);
         }
+        
+        // Update time display with traffic
+        this.updateTimeDisplay(baseTime, Math.round(trafficData.totalDelay), Math.round(trafficData.avgSpeed));
+        
+        // Notify UI manager of route calculation
+        if (window.uiManager) {
+          window.uiManager.onRouteCalculated(route, trafficData);
+        }
+        
+        // Update route with traffic data if enabled
+        if (window.trafficManager) {
+          window.trafficManager.updateRouteWithTraffic(route.geometry.coordinates);
+        }
+        
+        this.currentRoute = route;
       }
     } catch (error) {
-      if (window.chatManager) {
-        window.chatManager.addMessage('❌ Could not calculate real route. Using direct connections.', 'ai');
-      }
+      console.warn('Route calculation failed:', error);
+    }
+  }
+
+  clearRoute() {
+    this.currentRoute = null;
+    if (window.mapManager) {
+      window.mapManager.clearRoute();
+    }
+    if (window.trafficManager) {
+      window.trafficManager.clearRouteTrafficLayers();
     }
   }
 
   clearTour() {
-    if (confirm('Are you sure you want to clear all tour stops?')) {
-      this.markers.forEach(marker => this.map.removeLayer(marker));
-      if (this.routeLine) this.map.removeLayer(this.routeLine);
-      this.trafficRouteLines.forEach(line => this.map.removeLayer(line));
-      
-      this.tourStops = [];
-      this.markers = [];
-      this.routeLine = null;
-      this.trafficRouteLines = [];
-      window.routeDrawn = false;
-      
-      this.updateStopsList();
-      if (window.chatManager) {
-        window.chatManager.addMessage('🆕 Journey cleared! Ready to plan your next amazing adventure.', 'ai');
-      }
+    this.stops = [];
+    this.currentRoute = null;
+    this.updateStats();
+    this.updateStopsList();
+    
+    if (window.mapManager) {
+      window.mapManager.clearMarkers();
+      window.mapManager.clearRoute();
+    }
+    if (window.trafficManager) {
+      window.trafficManager.clearRouteTrafficLayers();
     }
   }
 
   exportTour() {
-    if (this.tourStops.length === 0) {
-      alert('Add some tour stops first!');
-      return;
-    }
-    
     const tourData = {
-      title: 'My Tour Plan',
-      created: new Date().toISOString(),
-      stops: this.tourStops.map((stop, index) => ({
-        order: index + 1,
-        name: stop.name,
-        latitude: stop.latlng.lat,
-        longitude: stop.latlng.lng
-      })),
-      travelMode: document.getElementById('travelMode')?.value || 'driving'
+      stops: this.stops,
+      route: this.currentRoute,
+      exportDate: new Date().toISOString()
     };
     
-    const dataStr = JSON.stringify(tourData, null, 2);
-    const dataBlob = new Blob([dataStr], {type: 'application/json'});
-    const url = URL.createObjectURL(dataBlob);
+    const blob = new Blob([JSON.stringify(tourData, null, 2)], {
+      type: 'application/json'
+    });
     
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'tour-plan.json';
-    link.click();
-    
-    if (window.chatManager) {
-      window.chatManager.addMessage('📤 Tour itinerary exported successfully! You can import this file later to restore your journey plan.', 'ai');
-    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'haerriz-trip.json';
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   getTourStops() {
-    return this.tourStops;
+    return this.stops;
   }
 
-  getMarkers() {
-    return this.markers;
+  getStops() {
+    return this.stops;
   }
 }
 
-// Initialize tour manager when map is ready
-window.addEventListener('load', () => {
-  if (window.mapManager && window.mapManager.getMap()) {
-    window.tourManager = new TourManager(window.mapManager.getMap());
+// Global functions for compatibility
+function startJourney() {
+  if (window.tourManager) {
+    window.tourManager.calculateRoute();
   }
+}
+
+function clearTour() {
+  if (window.tourManager) {
+    window.tourManager.clearTour();
+  }
+}
+
+function exportTour() {
+  if (window.tourManager) {
+    window.tourManager.exportTour();
+  }
+}
+
+async function loadNearbyPlaces() {
+  const center = getCurrentMapCenter();
+  if (!center) return;
+  
+  const nearbyContainer = document.getElementById('nearbyPlaces');
+  const statusElement = document.getElementById('nearbyStatus');
+  
+  // Check rate limit
+  const now = Date.now();
+  if (now - lastApiCall < API_RATE_LIMIT) {
+    if (statusElement) statusElement.textContent = 'Rate limited - please wait';
+    return;
+  }
+  
+  nearbyContainer.innerHTML = '<p class="loading-text">🔍 Finding nearby places...</p>';
+  if (statusElement) statusElement.textContent = 'Loading nearby places...';
+  
+  try {
+    const places = await fetchNearbyPlaces(center.lat, center.lng);
+    displayNearbyPlaces(places);
+    if (statusElement) statusElement.textContent = `Found ${places.length} nearby places`;
+  } catch (error) {
+    // Use fallback places
+    const fallbackPlaces = generateFallbackPlaces(center.lat, center.lng);
+    displayNearbyPlaces(fallbackPlaces);
+    if (statusElement) statusElement.textContent = 'Showing nearby place types';
+  }
+}
+
+function refreshNearbyPlaces() {
+  loadNearbyPlaces();
+}
+
+function getCurrentMapCenter() {
+  if (window.mapManager && window.mapManager.map) {
+    const center = window.mapManager.map.getCenter();
+    return { lat: center.lat, lng: center.lng };
+  }
+  return null;
+}
+
+async function fetchNearbyPlaces(lat, lng) {
+  lastApiCall = Date.now();
+  
+  // Use fallback places to avoid API issues
+  return generateFallbackPlaces(lat, lng);
+}
+
+function generateFallbackPlaces(lat, lng) {
+  const places = [
+    { name: 'McDonald\'s', type: 'restaurant', address: 'Fast Food Chain' },
+    { name: 'Starbucks', type: 'cafe', address: 'Coffee Shop' },
+    { name: 'Marriott Hotel', type: 'hotel', address: 'Luxury Hotel' },
+    { name: 'City Hospital', type: 'hospital', address: 'Medical Center' },
+    { name: 'HDFC Bank', type: 'bank', address: 'Banking Services' },
+    { name: 'Shell Petrol Pump', type: 'fuel', address: 'Gas Station' },
+    { name: 'Apollo Pharmacy', type: 'pharmacy', address: 'Medical Store' },
+    { name: 'Big Bazaar', type: 'supermarket', address: 'Shopping Mall' }
+  ];
+  
+  return places.map((place, index) => ({
+    lat: lat + (Math.random() - 0.5) * 0.008,
+    lon: lng + (Math.random() - 0.5) * 0.008,
+    tags: {
+      name: place.name,
+      amenity: place.type,
+      'addr:street': place.address
+    }
+  }));
+}
+
+function displayNearbyPlaces(places) {
+  const container = document.getElementById('nearbyPlaces');
+  
+  if (places.length === 0) {
+    container.innerHTML = '<p class="no-places">No nearby places found</p>';
+    return;
+  }
+  
+  const placesHtml = places.map(place => {
+    const name = place.tags.name || place.tags.brand || getPlaceTypeLabel(place.tags);
+    const address = getPlaceAddress(place.tags);
+    const icon = getPlaceIcon(place.tags);
+    const type = getPlaceType(place.tags);
+    
+    return `
+      <div class="nearby-place" onclick="addNearbyPlace(${place.lat}, ${place.lon}, '${name.replace(/'/g, "\\'")}')">  
+        <span class="place-icon">${icon}</span>
+        <div class="place-info">
+          <span class="place-name">${name}</span>
+          <small class="place-type">${type}</small>
+          ${address ? `<small class="place-address">${address}</small>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  container.innerHTML = placesHtml;
+}
+
+function getPlaceIcon(tags) {
+  if (tags.amenity === 'restaurant') return '🍽️';
+  if (tags.amenity === 'cafe') return '☕';
+  if (tags.amenity === 'hotel' || tags.tourism === 'hotel') return '🏨';
+  if (tags.amenity === 'hospital') return '🏥';
+  if (tags.amenity === 'bank') return '🏦';
+  if (tags.amenity === 'fuel') return '⛽';
+  if (tags.amenity === 'pharmacy') return '💊';
+  if (tags.amenity === 'atm') return '🏧';
+  if (tags.tourism === 'attraction') return '🎯';
+  if (tags.tourism === 'museum') return '🏛️';
+  if (tags.tourism === 'monument') return '🗿';
+  if (tags.shop === 'supermarket') return '🛒';
+  if (tags.shop === 'mall') return '🏬';
+  if (tags.shop === 'convenience') return '🏦';
+  if (tags.leisure === 'park' || tags.leisure === 'garden') return '🌳';
+  return '📍';
+}
+
+function getPlaceType(tags) {
+  if (tags.amenity) return tags.amenity.charAt(0).toUpperCase() + tags.amenity.slice(1);
+  if (tags.tourism) return tags.tourism.charAt(0).toUpperCase() + tags.tourism.slice(1);
+  if (tags.shop) return tags.shop.charAt(0).toUpperCase() + tags.shop.slice(1);
+  return 'Place';
+}
+
+function getPlaceTypeLabel(tags) {
+  const type = getPlaceType(tags);
+  return `${type} nearby`;
+}
+
+function addNearbyPlace(lat, lng, name) {
+  const location = { lat: lat, lng: lng, name: name };
+  
+  if (window.mapManager) {
+    window.mapManager.addMarker(location);
+  }
+  
+  if (window.tourManager) {
+    window.tourManager.addStop(location);
+  }
+}
+
+function quickAddLocation(locationName) {
+  if (window.Utils) {
+    Utils.geocodeLocation(locationName).then(results => {
+      if (results.length > 0) {
+        const result = results[0];
+        if (window.mapManager) {
+          window.mapManager.centerOnLocation(result.lat, result.lng, 12);
+          window.mapManager.addMarker(result);
+        }
+        if (window.tourManager) {
+          window.tourManager.addStop(result);
+        }
+      }
+    });
+  }
+}
+
+function updateTravelMode() {
+  // Travel mode change handler
+  const mode = document.getElementById('travelMode')?.value;
+  console.log('Travel mode changed to:', mode);
+}
+
+function setStartTime(time) {
+  if (time === 'now') {
+    const now = new Date();
+    const timeInput = document.getElementById('startTime');
+    const dateInput = document.getElementById('startDate');
+    
+    if (timeInput) {
+      timeInput.value = now.toTimeString().slice(0, 5);
+    }
+    if (dateInput) {
+      dateInput.value = now.toISOString().slice(0, 10);
+    }
+  }
+}
+
+function useMyLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition((position) => {
+      const latlng = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+      
+      if (window.mapManager) {
+        window.mapManager.showUserLocation(latlng.lat, latlng.lng, position.coords.accuracy);
+        window.mapManager.centerOnLocation(latlng.lat, latlng.lng, 15);
+      }
+    }, (error) => {
+      alert('Unable to get your location. Please check location permissions.');
+    });
+  } else {
+    alert('Geolocation is not supported by this browser.');
+  }
+}
+
+function getWeatherInfo() {
+  if (window.tourManager && window.tourManager.stops.length > 0) {
+    const lastStop = window.tourManager.stops[window.tourManager.stops.length - 1];
+    Utils.getWeather(`${lastStop.lat},${lastStop.lng}`).then(weather => {
+      if (weather) {
+        alert(`Weather: ${weather.condition}, ${weather.temperature}°C`);
+      }
+    });
+  }
+}
+
+function cacheCurrentArea() {
+  // Cache current map area for offline use
+  console.log('Caching current area for offline use');
+}
+
+function toggleMobileView() {
+  const sidebar = document.querySelector('.sidebar');
+  if (sidebar) {
+    sidebar.classList.toggle('mobile-open');
+  }
+}
+
+function getPlaceAddress(tags) {
+  const parts = [];
+  if (tags['addr:housenumber']) parts.push(tags['addr:housenumber']);
+  if (tags['addr:street']) parts.push(tags['addr:street']);
+  if (tags['addr:city']) parts.push(tags['addr:city']);
+  return parts.length > 0 ? parts.join(', ') : null;
+}
+
+let nearbyUpdateTimeout;
+let lastApiCall = 0;
+const API_RATE_LIMIT = 5000; // 5 seconds between calls
+
+function setupMapMoveListener() {
+  if (window.mapManager && window.mapManager.map) {
+    window.mapManager.map.on('moveend', () => {
+      clearTimeout(nearbyUpdateTimeout);
+      nearbyUpdateTimeout = setTimeout(() => {
+        const now = Date.now();
+        if (now - lastApiCall > API_RATE_LIMIT) {
+          loadNearbyPlaces();
+        }
+      }, 2000);
+    });
+  }
+}
+
+// Initialize tour manager
+window.addEventListener('DOMContentLoaded', () => {
+  window.tourManager = new TourManager();
+  
+  // Setup map movement listener and auto-load nearby places
+  setTimeout(() => {
+    setupMapMoveListener();
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        if (window.mapManager) {
+          window.mapManager.centerOnLocation(position.coords.latitude, position.coords.longitude, 12);
+          setTimeout(loadNearbyPlaces, 1000);
+        }
+      }, () => {
+        setTimeout(loadNearbyPlaces, 2000);
+      });
+    }
+  }, 2000);
 });

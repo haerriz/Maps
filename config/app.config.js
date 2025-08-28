@@ -1,41 +1,63 @@
-// Application configuration
-const APP_CONFIG = {
-  name: 'Haerriz Trip Planner',
-  version: '2.0.0',
-  description: 'AI-Powered Global Travel Route Optimizer',
+// Application Configuration - Free APIs Only
+const CONFIG = {
+  // Map Configuration
+  MAP_PROVIDER: 'OpenStreetMap',
+  MAP_TILES: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  MAP_ATTRIBUTION: '© OpenStreetMap contributors',
   
-  // Map configuration
-  map: {
-    defaultCenter: [20.5937, 78.9629],
-    defaultZoom: 5,
-    maxZoom: 20,
-    minZoom: 3
+  // Routing Service (Free)
+  ROUTING_SERVICE: 'OSRM',
+  ROUTING_URL: 'https://router.project-osrm.org/route/v1',
+  
+  // Geocoding Service (Free)
+  GEOCODING_SERVICE: 'Nominatim',
+  GEOCODING_URL: 'https://nominatim.openstreetmap.org/search',
+  
+  // Weather Service (Free - No API Key Required)
+  WEATHER_SERVICE: 'wttr.in',
+  WEATHER_URL: 'https://wttr.in',
+  
+  // Currency Exchange (Free - No API Key Required)
+  CURRENCY_SERVICE: 'fxratesapi',
+  CURRENCY_URL: 'https://api.fxratesapi.com/latest',
+  
+  // Location Service (Free - No API Key Required)
+  LOCATION_SERVICE: 'ipapi',
+  LOCATION_URL: 'https://ipapi.co/json',
+  
+  // Traffic Data (Free via OpenStreetMap)
+  TRAFFIC_SERVICE: 'overpass',
+  TRAFFIC_URL: 'https://overpass-api.de/api/interpreter',
+  
+  // Default Settings
+  DEFAULT_ZOOM: 13,
+  DEFAULT_CENTER: [51.505, -0.09], // London
+  MAX_ZOOM: 18,
+  MIN_ZOOM: 2,
+  
+  // Rate Limiting
+  RATE_LIMIT: {
+    GEOCODING: 1000, // requests per hour
+    ROUTING: 5000,   // requests per hour
+    WEATHER: 1000,   // requests per hour
   },
   
-  // API endpoints
-  apis: {
-    nominatim: 'https://nominatim.openstreetmap.org',
-    osrm: 'https://router.project-osrm.org',
-    overpass: 'https://overpass-api.de/api/interpreter'
-  },
+  // Supported Languages
+  LANGUAGES: ['en', 'es', 'fr', 'de', 'hi', 'zh', 'ja'],
   
-  // Feature flags
-  features: {
-    offlineMode: true,
-    trafficData: true,
-    weatherInfo: true,
-    multiModal: true
-  },
-  
-  // UI settings
-  ui: {
-    sidebarWidth: 465,
-    animationDuration: 300,
-    theme: 'light'
+  // Transport Modes
+  TRANSPORT_MODES: {
+    driving: { icon: '🚗', osrm: 'driving' },
+    walking: { icon: '🚶', osrm: 'foot' },
+    cycling: { icon: '🚴', osrm: 'bike' },
+    transit: { icon: '🚌', osrm: 'driving' }, // Fallback to driving
+    mixed: { icon: '🔄', osrm: 'driving' }
   }
 };
 
-// Export for use in other modules
+// Export for use in modules
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = APP_CONFIG;
+  module.exports = CONFIG;
+} else {
+  window.CONFIG = CONFIG;
 }

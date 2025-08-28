@@ -1,35 +1,83 @@
 /* Mobile Styles - up to 767px */
 @media (max-width: 767px) {
   .container {
-    flex-direction: column;
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
   }
 
   .sidebar {
     position: fixed;
-    top: 0;
+    bottom: 0;
     left: 0;
-    width: 100%;
-    max-width: 400px;
-    height: 100vh;
+    right: 0;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: 60vh;
+    max-height: 80vh;
+    background: white;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+    transform: translateY(calc(100% - 120px));
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
     z-index: 1003;
+    flex-shrink: 1;
+  }
+
+  .sidebar.mobile-expanded {
+    transform: translateY(0);
+  }
+
+  .sidebar-header {
+    padding: 12px 20px 8px;
+    border-bottom: none;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .sidebar-header::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: #dadce0;
+    border-radius: 2px;
+  }
+
+  .sidebar-header h1 {
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+
+  .sidebar-header p {
+    font-size: 12px;
+    margin-bottom: 0;
+  }
+
+  .subtitle-text {
     display: none;
   }
 
-  .sidebar.mobile-open {
-    display: block;
+  .mobile-toggle {
+    display: none;
   }
 
-  .mobile-toggle {
-    display: block;
-    position: fixed;
-    top: 16px;
-    left: 16px;
-    z-index: 1004;
+  .sidebar-content {
+    padding: 8px 20px 20px;
+    height: calc(100% - 80px);
+    overflow-y: auto;
   }
 
   #map {
     width: 100%;
     height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
   }
 
   /* Mobile sidebar content */
@@ -103,12 +151,31 @@
   /* Mobile tour stats */
   .tour-stats {
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    padding: 16px;
-    border-radius: 12px;
-    margin-bottom: 16px;
-    font-size: 14px;
-    border-left: 4px solid #4285f4;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    border-left: 3px solid #4285f4;
     box-shadow: 0 1px 3px rgba(60,64,67,0.1);
+  }
+
+  .tour-stops h3 {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .controls h3 {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .control-group {
+    margin-bottom: 12px;
+  }
+
+  .control-group label {
+    font-size: 12px;
+    margin-bottom: 6px;
   }
 
   /* Mobile AI Chat */
@@ -159,10 +226,122 @@
 
   /* Mobile FAB */
   .fab {
-    bottom: 16px;
-    left: 16px;
+    bottom: 140px;
+    right: 16px;
+    left: auto;
     width: 48px;
     height: 48px;
+  }
+
+  /* Mobile floating controls */
+  .mobile-controls {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    z-index: 1002;
+    display: flex;
+    gap: 8px;
+  }
+
+  /* Hide mobile controls on desktop */
+  @media (min-width: 768px) {
+    .mobile-controls {
+      display: none !important;
+    }
+  }
+
+  .mobile-search {
+    flex: 1;
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+  }
+
+  .mobile-search input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 12px 0;
+    font-size: 14px;
+  }
+
+  .mobile-search .material-icons {
+    color: #5f6368;
+    margin-right: 8px;
+  }
+
+  .mobile-menu-btn {
+    width: 48px;
+    height: 48px;
+    background: white;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .mobile-menu-btn .material-icons {
+    color: #4285f4;
+    font-size: 20px;
+  }
+
+  /* Mobile bottom sheet handle */
+  .bottom-sheet-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .bottom-sheet-handle::after {
+    content: '';
+    width: 40px;
+    height: 4px;
+    background: #dadce0;
+    border-radius: 2px;
+  }
+
+  /* Compact mobile sections */
+  .ai-chat-container {
+    padding: 12px;
+    margin-top: 8px;
+  }
+
+  .chat-messages-sidebar {
+    max-height: 120px;
+    margin-bottom: 8px;
+  }
+
+  .welcome-message {
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  .chat-input-sidebar input {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .chat-send-sidebar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .chat-suggestions-sidebar .suggestion-chip {
+    padding: 4px 8px;
+    font-size: 10px;
   }
 
   /* Mobile map controls */

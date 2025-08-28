@@ -1,189 +1,153 @@
-/**
- * Map Manager Module
- * Handles map initialization, layers, and 3D features
- */
-
+// Map Manager - Leaflet map integration
 class MapManager {
   constructor() {
     this.map = null;
-    this.layers = {};
-    this.is3DMode = false;
-    this.currentZoom = 5;
-    this.currentCenter = [20.5937, 78.9629];
+    this.markers = [];
+    this.routeLine = null;
+    this.userLocationMarker = null;
+    this.userAccuracyCircle = null;
     this.init();
   }
 
   init() {
-    // Initialize map with 3D-like features
-    this.map = L.map('map', {
-      zoomControl: false,
-      attributionControl: false,
-      preferCanvas: true,
-      maxZoom: 20,
-      minZoom: 3
-    }).setView(this.currentCenter, this.currentZoom);
-
-    // Add custom zoom control
-    L.control.zoom({
-      position: 'bottomright'
-    }).addTo(this.map);
-
-    this.setupLayers();
-    this.setup3DControls();
+    this.initializeMap();
     this.setupEventListeners();
   }
 
-  setupLayers() {
-    // Enhanced tile layers with offline caching support
-    this.layers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: '&copy; Esri',
-      maxZoom: 20,
-      useCache: true,
-      crossOrigin: true
-    });
-
-    this.layers.street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
+  initializeMap() {
+    // Initialize Leaflet map with proper zoom limits
+    this.map = L.map('map', {
+      minZoom: 2,
       maxZoom: 19,
-      useCache: true,
-      crossOrigin: true
+      zoomControl: true
+    }).setView([51.505, -0.09], 13);
+    
+    // Add OpenStreetMap tiles with proper zoom range
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      minZoom: 2,
+      maxZoom: 19
+    }).addTo(this.map);
+
+    // Map click handler
+    this.map.on('click', (e) => {
+      this.addMarker(e.latlng);
     });
-
-    this.layers.terrain = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.png', {
-      attribution: '&copy; Stamen Design',
-      maxZoom: 18,
-      useCache: true,
-      crossOrigin: true
-    });
-
-    this.layers.navigation = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-      attribution: '&copy; Google Maps',
-      maxZoom: 20,
-      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-      useCache: true,
-      crossOrigin: true
-    });
-
-    // Default to street view
-    this.layers.street.addTo(this.map);
-
-    // Layer control
-    const baseLayers = {
-      "Street": this.layers.street,
-      "Navigation": this.layers.navigation,
-      "Satellite": this.layers.satellite,
-      "Terrain": this.layers.terrain
-    };
-
-    L.control.layers(baseLayers).addTo(this.map);
-  }
-
-  setup3DControls() {
-    // 3D toggle button
-    const toggle3DButton = L.control({ position: 'topright' });
-    toggle3DButton.onAdd = () => {
-      const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
-      div.innerHTML = `<a href="#" title="Toggle 3D Navigation" id="toggle3D" style="
-        background: white;
-        width: 44px;
-        height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-        color: #333;
-        font-size: 18px;
-        border-radius: 6px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        transition: all 0.3s ease;
-      ">🌍</a>`;
-
-      div.onclick = (e) => {
-        e.preventDefault();
-        this.toggle3DNavigation();
-      };
-
-      return div;
-    };
-    toggle3DButton.addTo(this.map);
   }
 
   setupEventListeners() {
-    this.map.on('zoom', () => {
-      this.currentZoom = this.map.getZoom();
-      if (this.is3DMode) {
-        this.apply3DEffects();
-      }
-    });
-
-    this.map.on('move', () => {
-      this.currentCenter = this.map.getCenter();
-      if (this.is3DMode) {
-        this.apply3DEffects();
-      }
-    });
+    // Additional map event listeners can be added here
   }
 
-  toggle3DNavigation() {
-    this.is3DMode = !this.is3DMode;
-    if (this.is3DMode) {
-      this.apply3DEffects();
+  addMarker(latlng, title = 'Location') {
+    const marker = L.marker([latlng.lat, latlng.lng])
+      .addTo(this.map)
+      .bindPopup(latlng.name || title);
+    
+    this.markers.push(marker);
+    
+    // Auto-zoom to fit all markers
+    this.fitMarkersToView();
+    
+    // Update tour stops if tour manager exists
+    if (window.tourManager) {
+      window.tourManager.addStop(latlng);
+    }
+    
+    return marker;
+  }
+
+  showUserLocation(lat, lng, accuracy = 100) {
+    // Remove existing user location marker
+    if (this.userLocationMarker) {
+      this.map.removeLayer(this.userLocationMarker);
+    }
+    if (this.userAccuracyCircle) {
+      this.map.removeLayer(this.userAccuracyCircle);
+    }
+
+    // Create accuracy circle (light blue)
+    this.userAccuracyCircle = L.circle([lat, lng], {
+      radius: accuracy,
+      color: '#4285f4',
+      fillColor: '#4285f4',
+      fillOpacity: 0.1,
+      weight: 1,
+      opacity: 0.3
+    }).addTo(this.map);
+
+    // Create user location marker (blue dot)
+    const userIcon = L.divIcon({
+      className: 'user-location-marker',
+      html: '<div class="user-dot"></div>',
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    });
+
+    this.userLocationMarker = L.marker([lat, lng], { icon: userIcon })
+      .addTo(this.map)
+      .bindPopup('Your Location');
+  }
+
+  fitMarkersToView() {
+    if (this.markers.length === 0) return;
+    
+    if (this.markers.length === 1) {
+      // Single marker - zoom to it
+      const marker = this.markers[0];
+      this.map.setView(marker.getLatLng(), 15);
     } else {
-      this.remove3DEffects();
+      // Multiple markers - fit bounds
+      const group = new L.featureGroup(this.markers);
+      this.map.fitBounds(group.getBounds(), {
+        padding: [20, 20]
+      });
     }
   }
 
-  apply3DEffects() {
-    // Add 3D-like visual effects
-    const mapContainer = document.getElementById('map');
-    if (this.is3DMode) {
-      mapContainer.style.transform = 'perspective(1000px) rotateX(15deg)';
-      mapContainer.style.transformOrigin = 'center bottom';
-    }
+  centerOnLocation(lat, lng, zoom = 15) {
+    this.map.setView([lat, lng], zoom);
   }
 
-  remove3DEffects() {
-    const mapContainer = document.getElementById('map');
-    mapContainer.style.transform = 'none';
-  }
-
-  preloadTilesForArea(bounds, zoomLevels = [10, 12, 14]) {
-    if (!bounds) bounds = this.map.getBounds();
-    
-    if (window.chatManager) {
-      window.chatManager.addMessage('📥 Caching map tiles for offline use...', 'ai');
-    }
-    
-    const currentLayer = this.map._layers[Object.keys(this.map._layers).find(key => this.map._layers[key]._url)];
-    if (!currentLayer) return;
-    
-    let totalTiles = 0;
-    let cachedTiles = 0;
-    
-    zoomLevels.forEach(zoom => {
-      const tileBounds = L.bounds(
-        this.map.project(bounds.getSouthWest(), zoom).divideBy(256).floor(),
-        this.map.project(bounds.getNorthEast(), zoom).divideBy(256).ceil()
-      );
-      
-      for (let x = tileBounds.min.x; x <= tileBounds.max.x; x++) {
-        for (let y = tileBounds.min.y; y <= tileBounds.max.y; y++) {
-          totalTiles++;
-          const tileUrl = currentLayer._url
-            .replace('{s}', currentLayer.options.subdomains[0] || 'a')
-            .replace('{z}', zoom)
-            .replace('{x}', x)
-            .replace('{y}', y);
-          
-          fetch(tileUrl).then(() => {
-            cachedTiles++;
-            if (cachedTiles === totalTiles && window.chatManager) {
-              window.chatManager.addMessage(`✅ Cached ${totalTiles} map tiles for offline use!`, 'ai');
-            }
-          }).catch(() => {});
-        }
-      }
+  clearMarkers() {
+    this.markers.forEach(marker => {
+      this.map.removeLayer(marker);
     });
+    this.markers = [];
+  }
+
+  updateMarkers(stops) {
+    // Clear existing markers
+    this.clearMarkers();
+    
+    // Add markers for current stops
+    stops.forEach((stop, index) => {
+      const marker = L.marker([stop.lat, stop.lng])
+        .addTo(this.map)
+        .bindPopup(stop.name || `Stop ${index + 1}`);
+      this.markers.push(marker);
+    });
+    
+    // Auto-fit bounds if markers exist
+    if (stops.length > 0) {
+      this.fitMarkersToView();
+    }
+  }
+
+  clearRoute() {
+    if (this.routeLine) {
+      this.map.removeLayer(this.routeLine);
+      this.routeLine = null;
+    }
+  }
+
+  drawRoute(coordinates) {
+    if (this.routeLine) {
+      this.map.removeLayer(this.routeLine);
+    }
+    
+    this.routeLine = L.polyline(coordinates, {color: 'blue'}).addTo(this.map);
+    this.map.fitBounds(this.routeLine.getBounds());
   }
 
   getMap() {
@@ -191,5 +155,31 @@ class MapManager {
   }
 }
 
+// Global functions for compatibility
+function addCurrentLocationAsStop() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition((position) => {
+      const latlng = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+      if (window.mapManager) {
+        window.mapManager.addMarker(latlng);
+      }
+    });
+  }
+}
+
+function updateTrafficMode() {
+  // Traffic mode toggle functionality
+  const toggle = document.getElementById('trafficToggle');
+  const status = document.getElementById('trafficStatus');
+  if (status) {
+    status.textContent = toggle.checked ? 'On' : 'Off';
+  }
+}
+
 // Initialize map manager
-window.mapManager = new MapManager();
+window.addEventListener('DOMContentLoaded', () => {
+  window.mapManager = new MapManager();
+});

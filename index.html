@@ -67,8 +67,8 @@
   <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg" />
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="manifest.json" />
+  <!-- PWA Manifest (disabled for file:// protocol) -->
+  <!-- <link rel="manifest" href="manifest.json" /> -->
   
   <!-- Preload Critical Resources -->
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
@@ -90,9 +90,9 @@
   <link rel="preconnect" href="https://overpass-api.de" crossorigin />
   
   <!-- DNS Prefetch -->
-  <link rel="dns-prefetch" href="//api.exchangerate-api.com" />
+  <link rel="dns-prefetch" href="//api.fxratesapi.com" />
   <link rel="dns-prefetch" href="//wttr.in" />
-  <link rel="dns-prefetch" href="//api.aviationstack.com" />
+  <link rel="dns-prefetch" href="//ipapi.co" />
   <link rel="dns-prefetch" href="//fonts.googleapis.com" />
   <link rel="dns-prefetch" href="//fonts.gstatic.com" />
   
@@ -277,11 +277,11 @@
 <body>
   <div class="container">
     <div class="sidebar">
-      <div class="sidebar-header">
+      <div class="sidebar-header" onclick="toggleMobileSheet()">
+        <div class="bottom-sheet-handle"></div>
         <h1><span class="material-icons">travel_explore</span> Haerriz Trip Planner</h1>
         <p>AI-Powered Global Travel Route Optimizer</p>
         <small class="subtitle-text">Plan • Optimize • Explore • Discover</small>
-        <button class="mobile-toggle" onclick="toggleMobileView()" id="mobileToggle">📍 Map</button>
       </div>
       
       <div class="sidebar-content">
@@ -374,34 +374,13 @@
           </div>
           
           <div class="control-group">
-            <label>Quick Add Locations:</label>
-            <div class="chip-row">
-              <div class="chip" onclick="quickAddLocation('New York, USA')">🗽 NYC</div>
-              <div class="chip" onclick="quickAddLocation('Paris, France')">🗼 Paris</div>
-              <div class="chip" onclick="quickAddLocation('London, UK')">🇬🇧 London</div>
-              <div class="chip" onclick="quickAddLocation('Tokyo, Japan')">🗾 Tokyo</div>
-              <div class="chip" onclick="quickAddLocation('Dubai, UAE')">🏙️ Dubai</div>
+            <label>Nearby Places:</label>
+            <div class="nearby-status">
+              <span class="material-icons">near_me</span>
+              <span id="nearbyStatus">Auto-updating nearby places...</span>
             </div>
-            <div class="chip-row">
-              <div class="chip" onclick="quickAddLocation('Sydney, Australia')">🇦🇺 Sydney</div>
-              <div class="chip" onclick="quickAddLocation('Rome, Italy')">🏛️ Rome</div>
-              <div class="chip" onclick="quickAddLocation('Barcelona, Spain')">🇪🇸 Barcelona</div>
-              <div class="chip" onclick="quickAddLocation('Bangkok, Thailand')">🇹🇭 Bangkok</div>
-              <div class="chip" onclick="quickAddLocation('Singapore')">🇸🇬 Singapore</div>
-            </div>
-            <div class="chip-row">
-              <div class="chip" onclick="quickAddLocation('Mumbai, India')">🇮🇳 Mumbai</div>
-              <div class="chip" onclick="quickAddLocation('Los Angeles, USA')">🌴 LA</div>
-              <div class="chip" onclick="quickAddLocation('Berlin, Germany')">🇩🇪 Berlin</div>
-              <div class="chip" onclick="quickAddLocation('Cairo, Egypt')">🇪🇬 Cairo</div>
-              <div class="chip" onclick="quickAddLocation('Istanbul, Turkey')">🇹🇷 Istanbul</div>
-            </div>
-            <div class="chip-row">
-              <div class="chip" onclick="quickAddLocation('São Paulo, Brazil')">🇧🇷 São Paulo</div>
-              <div class="chip" onclick="quickAddLocation('Moscow, Russia')">🇷🇺 Moscow</div>
-              <div class="chip" onclick="quickAddLocation('Seoul, South Korea')">🇰🇷 Seoul</div>
-              <div class="chip" onclick="quickAddLocation('Mexico City, Mexico')">🇲🇽 Mexico</div>
-              <div class="chip" onclick="quickAddLocation('Cape Town, South Africa')">🇿🇦 Cape Town</div>
+            <div id="nearbyPlaces" class="nearby-places">
+              <p class="nearby-hint">Click "Find Nearby" to discover places around your current location or map center</p>
             </div>
           </div>
           
@@ -430,56 +409,47 @@
               <small class="footer-small">Powered by <strong>Google</strong><br>© 2025 • World's Smartest Trip Planner</small>
             </div>
           </div>
+          
+          <!-- AI Assistant Section -->
+          <div class="control-group">
+            <h3><span class="material-icons">smart_toy</span> AI Travel Assistant</h3>
+            <div class="ai-chat-container" id="aiChatContainer">
+              <div class="chat-messages-sidebar" id="chatMessages">
+                <div class="welcome-message">
+                  <span class="material-icons">smart_toy</span>
+                  <p>Hi! I'm your AI travel assistant. Ask me about destinations, routes, weather, or travel tips!</p>
+                </div>
+              </div>
+              <div class="chat-input-sidebar">
+                <input type="text" id="chatInput" placeholder="Ask about destinations, routes, weather..." />
+                <button class="chat-send-sidebar" onclick="sendMessage()">
+                  <span class="material-icons">send</span>
+                </button>
+              </div>
+              <div class="chat-suggestions-sidebar">
+                <div class="suggestion-chip" onclick="sendQuickMessage('What are the best places to visit?')">🏛️ Best places</div>
+                <div class="suggestion-chip" onclick="sendQuickMessage('How is the weather?')">🌤️ Weather</div>
+                <div class="suggestion-chip" onclick="sendQuickMessage('Plan my route')">🗺️ Route help</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
       <div class="mobile-dragger" id="mobileDragger"></div>
     </div>
     
-    <div id="map">
-      <div class="map-controls">
-        <div class="traffic-toggle">
-          <input type="checkbox" id="mapTrafficToggle" onchange="updateTrafficMode()" />
-          <label for="mapTrafficToggle">
-            <span class="material-icons traffic-icon">traffic</span>
-            Live Traffic
-          </label>
-        </div>
+    <div id="map"></div>
+    
+    <!-- Mobile floating controls -->
+    <div class="mobile-controls">
+      <div class="mobile-search">
+        <span class="material-icons">search</span>
+        <input type="text" id="mobileSearchInput" placeholder="Search destinations..." />
       </div>
-    </div>
-  </div>
-  
-  <!-- AI Chat Bubble -->
-  <div class="ai-chat-bubble" onclick="toggleAIChat()" id="aiChatBubble">
-    <span class="material-icons">smart_toy</span>
-    <div class="chat-notification" id="chatNotification">1</div>
-  </div>
-  
-  <!-- AI Chat Popup -->
-  <div class="ai-chat-popup" id="aiChatPopup">
-    <div class="chat-header">
-      <div class="chat-avatar">
-        <span class="material-icons">smart_toy</span>
-      </div>
-      <div class="chat-title">
-        <h3>Haerriz AI Assistant</h3>
-        <p>Your intelligent travel companion</p>
-      </div>
-      <button class="chat-close" onclick="toggleAIChat()">
-        <span class="material-icons">close</span>
+      <button class="mobile-menu-btn" onclick="toggleMobileSheet()">
+        <span class="material-icons">tune</span>
       </button>
-    </div>
-    <div class="chat-messages" id="chatMessages"></div>
-    <div class="chat-input-container">
-      <input type="text" id="chatInput" placeholder="Ask about destinations, routes, weather..." />
-      <button class="chat-send" onclick="sendMessage()">
-        <span class="material-icons">send</span>
-      </button>
-    </div>
-    <div class="chat-suggestions">
-      <div class="suggestion-chip" onclick="sendQuickMessage('What are the best places to visit?')">🏛️ Best places</div>
-      <div class="suggestion-chip" onclick="sendQuickMessage('How is the weather?')">🌤️ Weather</div>
-      <div class="suggestion-chip" onclick="sendQuickMessage('Plan my route')">🗺️ Route help</div>
     </div>
   </div>
   
