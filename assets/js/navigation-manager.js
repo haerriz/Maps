@@ -270,49 +270,46 @@ class NavigationManager {
     return eta.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  async startLocationTracking() {
-    if (!navigator.geolocation) {
-      this.showNavigationError('Geolocation is not supported by this browser.');
-      return;
-    }
+  startLocationTracking() {
+    // Location tracking disabled - use simulated navigation
+    console.log('Location tracking disabled - using simulated navigation');
+    this.simulateLocationTracking();
+  }
 
-    // Check permissions for navigation
-    try {
-      const permission = await navigator.permissions.query({name: 'geolocation'});
-      if (permission.state === 'denied') {
-        this.showNavigationError('Location access denied. Navigation requires location permissions.');
+  simulateLocationTracking() {
+    // Simulate location updates for navigation demo
+    let stepIndex = 0;
+    this.simulationInterval = setInterval(() => {
+      if (!this.isNavigating || stepIndex >= this.navigationSteps.length) {
+        clearInterval(this.simulationInterval);
         return;
       }
-    } catch (error) {
-      console.log('Permissions API not supported, proceeding with location tracking');
-    }
 
-    this.watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        const newPosition = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          heading: position.coords.heading || 0,
-          speed: position.coords.speed || 0
+      const currentStep = this.navigationSteps[stepIndex];
+      if (currentStep && currentStep.coordinates && currentStep.coordinates.length > 0) {
+        const coord = currentStep.coordinates[0];
+        this.currentPosition = {
+          lat: coord[0],
+          lng: coord[1],
+          heading: 0,
+          speed: 50 // Simulated speed
         };
+
+        this.updateSpeed(this.currentPosition);
+        this.updateUserLocationMarker(this.currentPosition);
         
-        this.updateSpeed(newPosition);
-        this.currentHeading = newPosition.heading;
-        this.updateUserLocationMarker(newPosition);
+        // Move to next step
+        stepIndex++;
+        this.currentStep = stepIndex;
         
-        this.currentPosition = newPosition;
-        this.checkNavigationProgress();
-        this.checkIfOffRoute();
-      },
-      (error) => {
-        this.handleNavigationLocationError(error);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 5000
+        if (stepIndex < this.navigationSteps.length) {
+          this.updateNavigationDisplay();
+          this.speakInstruction(this.navigationSteps[stepIndex]);
+        } else {
+          this.arriveAtDestination();
+        }
       }
-    );
+    }, 5000); // Update every 5 seconds for demo
   }
 
   handleNavigationLocationError(error) {
@@ -662,10 +659,10 @@ class NavigationManager {
       window.map3DManager.disable3DMode();
     }
     
-    // Stop location tracking
-    if (this.watchId) {
-      navigator.geolocation.clearWatch(this.watchId);
-      this.watchId = null;
+    // Stop simulation interval
+    if (this.simulationInterval) {
+      clearInterval(this.simulationInterval);
+      this.simulationInterval = null;
     }
     
     // Remove navigation UI

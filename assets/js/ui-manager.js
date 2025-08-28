@@ -299,61 +299,19 @@ function setupSearchInput() {
 }
 
 // Auto-detect user location on load
-async function autoDetectLocation() {
-  if (!navigator.geolocation) {
-    console.log('Geolocation not supported');
-    if (window.mapManager) {
-      window.mapManager.centerOnLocation(51.505, -0.09, 10);
+function autoDetectLocation() {
+  // Geolocation disabled - use default location
+  console.log('Auto-location disabled, using default location (London)');
+  if (window.mapManager) {
+    window.mapManager.centerOnLocation(51.505, -0.09, 10);
+  }
+  
+  // Load nearby places for default location
+  setTimeout(() => {
+    if (window.loadNearbyPlaces) {
+      loadNearbyPlaces();
     }
-    return;
-  }
-
-  // Check permissions silently
-  try {
-    const permission = await navigator.permissions.query({name: 'geolocation'});
-    if (permission.state === 'denied') {
-      console.log('Geolocation denied, using default location');
-      if (window.mapManager) {
-        window.mapManager.centerOnLocation(51.505, -0.09, 10);
-      }
-      return;
-    }
-  } catch (error) {
-    console.log('Permissions API not supported');
-  }
-
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        
-        // Center map on user location
-        if (window.mapManager) {
-          window.mapManager.centerOnLocation(latitude, longitude, 12);
-          window.mapManager.showUserLocation(latitude, longitude, position.coords.accuracy);
-        }
-        
-        // Load nearby places
-        setTimeout(() => {
-          if (window.loadNearbyPlaces) {
-            loadNearbyPlaces();
-          }
-        }, 1000);
-      },
-      (error) => {
-        console.log('Location access denied or unavailable');
-        // Fallback to default location (London)
-        if (window.mapManager) {
-          window.mapManager.centerOnLocation(51.505, -0.09, 10);
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000 // 5 minutes
-      }
-    );
-  }
+  }, 1000);
 }
 
 // Auto-expand sections and setup on load

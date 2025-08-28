@@ -181,16 +181,17 @@ class MapManager {
 
 // Global functions for compatibility
 function addCurrentLocationAsStop() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition((position) => {
-      const latlng = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      };
-      if (window.mapManager) {
-        window.mapManager.addMarker(latlng);
-      }
-    });
+  // Geolocation disabled - prompt user to search
+  const searchInput = document.getElementById('startLocation');
+  if (searchInput) {
+    searchInput.focus();
+    searchInput.placeholder = 'Enter your current location to add as stop';
+  }
+  
+  if (window.chatManager) {
+    window.chatManager.addMessage('Please search for your current location in the search box to add it as a stop.', 'ai');
+  } else {
+    alert('Please search for your current location using the search box.');
   }
 }
 

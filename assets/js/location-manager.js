@@ -4,52 +4,25 @@ class LocationManager {
     this.userLocation = null;
   }
 
-  async useMyLocation() {
-    if (!navigator.geolocation) {
-      this.showLocationError('Geolocation is not supported by this browser.');
-      return;
-    }
+  useMyLocation() {
+    // Geolocation disabled - prompt user to search for location
+    this.showLocationPrompt();
+  }
 
-    // Check permissions first
-    try {
-      const permission = await navigator.permissions.query({name: 'geolocation'});
-      if (permission.state === 'denied') {
-        this.showLocationError('Geolocation access is denied. Please enable location permissions in your browser settings.');
-        return;
-      }
-    } catch (error) {
-      console.log('Permissions API not supported, proceeding with geolocation request');
+  showLocationPrompt() {
+    const searchInput = document.getElementById('startLocation');
+    if (searchInput) {
+      searchInput.focus();
+      searchInput.placeholder = 'Enter your current location (e.g., New York, London, Tokyo)';
+      searchInput.style.borderColor = '#4285f4';
+      searchInput.style.boxShadow = '0 0 0 2px rgba(66, 133, 244, 0.2)';
     }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const latlng = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          name: 'My Location'
-        };
-        
-        this.userLocation = latlng;
-        
-        if (window.mapManager) {
-          window.mapManager.showUserLocation(latlng.lat, latlng.lng, position.coords.accuracy);
-          window.mapManager.centerOnLocation(latlng.lat, latlng.lng, 15);
-        }
-        
-        // Add as first stop if no stops exist
-        if (window.tourManager && window.tourManager.stops.length === 0) {
-          window.tourManager.addStop(latlng);
-        }
-      },
-      (error) => {
-        this.handleGeolocationError(error);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 300000
-      }
-    );
+    
+    if (window.chatManager) {
+      window.chatManager.addMessage('Please search for your location in the search box above to get started!', 'ai');
+    } else {
+      alert('Please search for your location using the search box to get started.');
+    }
   }
 
   handleGeolocationError(error) {
@@ -87,58 +60,10 @@ class LocationManager {
     }
   }
 
-  async autoDetectLocation() {
-    if (!navigator.geolocation) {
-      console.log('Geolocation not supported, using default location');
-      this.useDefaultLocation();
-      return;
-    }
-
-    // Check permissions silently for auto-detection
-    try {
-      const permission = await navigator.permissions.query({name: 'geolocation'});
-      if (permission.state === 'denied') {
-        console.log('Geolocation denied, using default location');
-        this.useDefaultLocation();
-        return;
-      }
-    } catch (error) {
-      console.log('Permissions API not supported, proceeding with geolocation request');
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        
-        this.userLocation = {
-          lat: latitude,
-          lng: longitude,
-          name: 'My Location'
-        };
-        
-        // Center map on user location
-        if (window.mapManager) {
-          window.mapManager.centerOnLocation(latitude, longitude, 12);
-          window.mapManager.showUserLocation(latitude, longitude, position.coords.accuracy);
-        }
-        
-        // Load nearby places
-        setTimeout(() => {
-          if (window.nearbyPlacesManager) {
-            window.nearbyPlacesManager.loadNearbyPlaces();
-          }
-        }, 1000);
-      },
-      (error) => {
-        console.log('Location access denied or unavailable:', error.message);
-        this.useDefaultLocation();
-      },
-      {
-        enableHighAccuracy: false, // Less strict for auto-detection
-        timeout: 8000,
-        maximumAge: 600000 // 10 minutes
-      }
-    );
+  autoDetectLocation() {
+    // Auto-detect disabled - use default location
+    console.log('Auto-location disabled, using default location');
+    this.useDefaultLocation();
   }
 
   useDefaultLocation() {
