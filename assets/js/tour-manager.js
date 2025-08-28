@@ -242,10 +242,10 @@ class TourManager {
 
 // Global functions for compatibility
 function startJourney() {
-  if (window.tourManager) {
+  if (window.tourManager && window.navigationManager) {
     if (window.tourManager.stops.length >= 2) {
-      window.tourManager.calculateRoute();
-      alert('Journey started! Follow the route on the map.');
+      // Start turn-by-turn navigation
+      window.navigationManager.startNavigation(window.tourManager.stops);
     } else if (window.tourManager.stops.length === 1) {
       alert('Please add a destination to start your journey.');
     } else {

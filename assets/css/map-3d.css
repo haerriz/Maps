@@ -1,0 +1,177 @@
+/* 3D Map Styling */
+.map-3d-container {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.map-3d-enhanced {
+  /* Minimal 3D enhancement */
+}
+
+/* Simplified building effects */
+.building-3d {
+  display: none; /* Disable to prevent issues */
+}
+
+/* 3D Route Enhancement */
+.navigation-route-3d {
+  stroke: #1a73e8 !important;
+  stroke-width: 10px !important;
+  stroke-opacity: 1 !important;
+  filter: 
+    drop-shadow(0 6px 12px rgba(26, 115, 232, 0.6))
+    drop-shadow(0 2px 4px rgba(0,0,0,0.3)) !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  z-index: 1000 !important;
+}
+
+/* 3D Markers */
+.leaflet-marker-icon {
+  filter: 
+    drop-shadow(0 4px 8px rgba(0,0,0,0.4))
+    drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+  transform: translateZ(10px);
+  transition: all 0.3s ease;
+}
+
+.leaflet-marker-icon:hover {
+  transform: translateZ(15px) scale(1.1);
+  filter: 
+    drop-shadow(0 6px 12px rgba(0,0,0,0.5))
+    drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+/* Simplified tile rendering */
+.map-3d-enhanced .leaflet-tile {
+  /* Keep original appearance */
+}
+
+/* 3D User Location */
+.map-3d-enhanced .user-location-marker {
+  filter: 
+    drop-shadow(0 4px 12px rgba(66, 133, 244, 0.8))
+    drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+  transform: translateZ(20px);
+}
+
+.map-3d-enhanced .user-dot-with-compass {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateZ(20px) translateY(0px);
+  }
+  50% {
+    transform: translateZ(25px) translateY(-3px);
+  }
+}
+
+/* 3D Compass Triangle */
+.map-3d-enhanced .compass-triangle {
+  filter: drop-shadow(0 2px 4px rgba(234, 67, 53, 0.6));
+  transform-origin: 50% 100%;
+}
+
+/* Terrain-like Effects */
+.map-3d-enhanced .leaflet-overlay-pane {
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.2));
+}
+
+/* Water Bodies 3D Effect */
+.map-3d-enhanced .leaflet-overlay-pane path[fill*="blue"],
+.map-3d-enhanced .leaflet-overlay-pane path[stroke*="blue"] {
+  filter: 
+    brightness(1.2) 
+    saturate(1.5)
+    drop-shadow(0 2px 6px rgba(66, 133, 244, 0.4));
+}
+
+/* Green Areas 3D Effect */
+.map-3d-enhanced .leaflet-overlay-pane path[fill*="green"],
+.map-3d-enhanced .leaflet-overlay-pane path[stroke*="green"] {
+  filter: 
+    brightness(1.1) 
+    saturate(1.3)
+    drop-shadow(0 1px 4px rgba(52, 168, 83, 0.3));
+}
+
+/* Roads 3D Enhancement */
+.map-3d-enhanced .leaflet-interactive {
+  filter: 
+    drop-shadow(0 2px 6px rgba(0,0,0,0.3))
+    brightness(1.05);
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+}
+
+/* Traffic Segments 3D */
+.map-3d-enhanced .route-traffic-segment {
+  filter: 
+    drop-shadow(0 3px 8px rgba(0,0,0,0.4))
+    brightness(1.1) !important;
+  stroke-width: 8px !important;
+}
+
+/* Navigation Controls 3D */
+.map-3d-enhanced + .navigation-overlay {
+  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, rgba(26, 115, 232, 0.95), rgba(66, 133, 244, 0.9));
+  box-shadow: 
+    0 8px 32px rgba(0,0,0,0.3),
+    inset 0 1px 2px rgba(255,255,255,0.2);
+}
+
+/* 3D Mode Toggle Button */
+.map-3d-toggle {
+  position: absolute;
+  top: 70px;
+  right: 16px;
+  background: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: #202124;
+  z-index: 1500;
+  transition: all 0.2s ease;
+}
+
+.map-3d-toggle:hover {
+  background: #f8f9fa;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.map-3d-toggle.active {
+  background: #1a73e8;
+  color: white;
+}
+
+.map-3d-toggle .material-icons {
+  font-size: 16px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+/* Minimal transitions */
+.map-3d-enhanced {
+  transition: transform 0.3s ease;
+}
+
+/* Performance Optimizations */
+.map-3d-enhanced .leaflet-tile-container {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.map-3d-enhanced .leaflet-marker-pane {
+  transform: translateZ(0);
+}
+
+.map-3d-enhanced .leaflet-overlay-pane {
+  transform: translateZ(0);
+}

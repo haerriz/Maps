@@ -89,6 +89,30 @@ class MapManager {
       .bindPopup('Your Location');
   }
 
+  updateUserLocationWithHeading(lat, lng, heading = 0) {
+    // Remove existing user location marker
+    if (this.userLocationMarker) {
+      this.map.removeLayer(this.userLocationMarker);
+    }
+
+    // Create user location marker with compass direction
+    const userIcon = L.divIcon({
+      className: 'user-location-marker',
+      html: `
+        <div class="user-dot-with-compass">
+          <div class="user-dot"></div>
+          <div class="compass-triangle" style="transform: rotate(${heading}deg)"></div>
+        </div>
+      `,
+      iconSize: [24, 24],
+      iconAnchor: [12, 12]
+    });
+
+    this.userLocationMarker = L.marker([lat, lng], { icon: userIcon })
+      .addTo(this.map)
+      .bindPopup('Your Location');
+  }
+
   fitMarkersToView() {
     if (this.markers.length === 0) return;
     
