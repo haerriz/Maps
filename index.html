@@ -99,7 +99,7 @@
   <!-- Security Headers -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' https: data:;" />
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-  <meta http-equiv="X-Frame-Options" content="DENY" />
+
   <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
 
   <!-- Performance Optimization -->
@@ -311,125 +311,164 @@
         </div>
         
         <div class="controls">
-          <h3><span class="material-icons">settings</span> Trip Planning Controls</h3>
-          
-          <div class="control-group">
-            <label>Search & Add Locations:</label>
+          <!-- Search Section -->
+          <div class="section-card">
             <div class="search-container">
-              <input type="text" id="startLocation" placeholder="Search cities, attractions, hotels, restaurants..." autocomplete="off" />
+              <div class="search-input-wrapper">
+                <span class="material-icons search-icon">search</span>
+                <input type="text" id="startLocation" placeholder="Search cities, attractions, hotels, restaurants..." autocomplete="off" />
+                <button class="clear-search" onclick="clearSearch()" style="display: none;">
+                  <span class="material-icons">close</span>
+                </button>
+              </div>
               <div id="searchSuggestions" class="search-suggestions"></div>
             </div>
             <div class="button-row">
               <button class="btn btn-secondary button-flex" onclick="searchLocation()">
                 <span class="material-icons">search</span>
-                Find & Center
+                Find
               </button>
               <button class="btn btn-success button-flex" onclick="searchAndAddStop()">
                 <span class="material-icons">add_location</span>
-                Add as Stop
+                Add Stop
+              </button>
+              <button class="btn btn-outline button-flex" onclick="useMyLocation()">
+                <span class="material-icons">my_location</span>
+                My Location
               </button>
             </div>
           </div>
-          
-          <div class="control-group">
-            <label>Travel Mode:</label>
-            <select id="travelMode" onchange="updateTravelMode()">
-              <option value="driving">🚗 Driving</option>
-              <option value="walking">🚶 Walking</option>
-              <option value="cycling">🚴 Cycling</option>
-              <option value="transit">🚌 Public Transit</option>
-              <option value="mixed">🔄 Mixed Mode</option>
-            </select>
-          </div>
-          
-          <div class="control-group">
-            <label>Journey Start:</label>
-            <div class="time-controls">
-              <button class="btn btn-secondary button-flex" onclick="setStartTime('now')">
-                <span class="material-icons preference-icon">schedule</span>
-                Now
-              </button>
-              <input type="time" id="startTime" class="time-input" />
-              <input type="date" id="startDate" class="time-input" />
-            </div>
-          </div>
-          
-          <div class="control-group">
-            <label>Travel Preferences:</label>
-            <div class="preferences-row">
-              <label class="preference-label">
-                <input type="checkbox" id="includeBreaks" checked /> <span class="material-icons preference-icon">wc</span> Loo Breaks
-              </label>
-              <label class="preference-label">
-                <input type="checkbox" id="includeFood" checked /> <span class="material-icons preference-icon">restaurant</span> Food Stops
-              </label>
-              <label class="preference-label">
-                <input type="checkbox" id="includeFuel" /> <span class="material-icons preference-icon">local_gas_station</span> Fuel Stops
-              </label>
-              <label class="preference-label">
-                <input type="checkbox" id="trafficToggle" onchange="updateTrafficMode()" /> <span class="material-icons preference-icon">traffic</span> Live Traffic
+
+          <!-- Quick Settings -->
+          <div class="section-card">
+            <div class="quick-settings">
+              <select id="travelMode" onchange="updateTravelMode()" class="mode-select">
+                <option value="driving">🚗 Driving</option>
+                <option value="walking">🚶 Walking</option>
+                <option value="cycling">🚴 Cycling</option>
+                <option value="transit">🚌 Transit</option>
+              </select>
+              <label class="toggle-switch">
+                <input type="checkbox" id="trafficToggle" onchange="updateTrafficMode()" />
+                <span class="slider"></span>
+                <span class="toggle-label">Live Traffic</span>
               </label>
             </div>
-            <small class="traffic-note">Live traffic updates route colors every 1.5s</small>
           </div>
-          
-          <div class="control-group">
-            <label>Nearby Places:</label>
-            <div class="nearby-status">
-              <span class="material-icons">near_me</span>
-              <span id="nearbyStatus">Auto-updating nearby places...</span>
+
+          <!-- Advanced Options (Collapsible) -->
+          <div class="section-card collapsible">
+            <div class="section-header" onclick="toggleSection('advanced')">
+              <span class="material-icons">tune</span>
+              <span>Advanced Options</span>
+              <span class="material-icons expand-icon">expand_more</span>
             </div>
-            <div id="nearbyPlaces" class="nearby-places">
-              <p class="nearby-hint">Click "Find Nearby" to discover places around your current location or map center</p>
-            </div>
-          </div>
-          
-          <div class="control-group">
-            <button class="btn btn-success full-width control-buttons" onclick="exportTour()">
-              <span class="material-icons">download</span>
-              Export Tour
-            </button>
-            <button class="btn btn-outline full-width control-buttons" onclick="useMyLocation()">
-              <span class="material-icons">my_location</span>
-              Use My Location
-            </button>
-            <button class="btn btn-secondary full-width control-buttons" onclick="getWeatherInfo()">
-              <span class="material-icons">wb_sunny</span>
-              Weather Info
-            </button>
-            <button class="btn btn-primary full-width control-buttons" onclick="cacheCurrentArea()">
-              <span class="material-icons">cloud_download</span>
-              Cache for Offline
-            </button>
-            <button class="btn btn-danger full-width" onclick="clearTour()">
-              <span class="material-icons">delete</span>
-              Clear Journey
-            </button>
-            <div class="footer-text">
-              <small class="footer-small">Powered by <strong>Google</strong><br>© 2025 • World's Smartest Trip Planner</small>
-            </div>
-          </div>
-          
-          <!-- AI Assistant Section -->
-          <div class="control-group">
-            <h3><span class="material-icons">smart_toy</span> AI Travel Assistant</h3>
-            <div class="ai-chat-container" id="aiChatContainer">
-              <div class="chat-messages-sidebar" id="chatMessages">
-                <div class="welcome-message">
-                  <span class="material-icons">smart_toy</span>
-                  <p>Hi! I'm your AI travel assistant. Ask me about destinations, routes, weather, or travel tips!</p>
-                </div>
+            <div class="section-content" id="advanced">
+              <div class="time-controls">
+                <button class="btn btn-secondary button-flex" onclick="setStartTime('now')">
+                  <span class="material-icons">schedule</span>
+                  Now
+                </button>
+                <input type="time" id="startTime" class="time-input" />
+                <input type="date" id="startDate" class="time-input" />
               </div>
-              <div class="chat-input-sidebar">
-                <input type="text" id="chatInput" placeholder="Ask about destinations, routes, weather..." />
-                <button class="chat-send-sidebar" onclick="sendMessage()">
-                  <span class="material-icons">send</span>
+              
+              <div class="preferences-grid">
+                <label class="preference-item">
+                  <input type="checkbox" id="includeBreaks" checked />
+                  <span class="material-icons">wc</span>
+                  <span>Breaks</span>
+                </label>
+                <label class="preference-item">
+                  <input type="checkbox" id="includeFood" checked />
+                  <span class="material-icons">restaurant</span>
+                  <span>Food</span>
+                </label>
+                <label class="preference-item">
+                  <input type="checkbox" id="includeFuel" />
+                  <span class="material-icons">local_gas_station</span>
+                  <span>Fuel</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nearby Places (Collapsible) -->
+          <div class="section-card collapsible">
+            <div class="section-header" onclick="toggleSection('nearby')">
+              <span class="material-icons">near_me</span>
+              <span>Nearby Places</span>
+              <span class="material-icons expand-icon">expand_more</span>
+            </div>
+            <div class="section-content" id="nearby">
+              <div class="nearby-status">
+                <span id="nearbyStatus">Auto-updating nearby places...</span>
+              </div>
+              <div id="nearbyPlaces" class="nearby-places">
+                <p class="nearby-hint">Discovering places around your location...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions (Collapsible) -->
+          <div class="section-card collapsible">
+            <div class="section-header" onclick="toggleSection('actions')">
+              <span class="material-icons">more_horiz</span>
+              <span>More Actions</span>
+              <span class="material-icons expand-icon">expand_more</span>
+            </div>
+            <div class="section-content" id="actions">
+              <div class="action-grid">
+                <button class="btn btn-secondary" onclick="getWeatherInfo()">
+                  <span class="material-icons">wb_sunny</span>
+                  Weather
+                </button>
+                <button class="btn btn-primary" onclick="cacheCurrentArea()">
+                  <span class="material-icons">cloud_download</span>
+                  Cache
+                </button>
+                <button class="btn btn-success" onclick="exportTour()">
+                  <span class="material-icons">download</span>
+                  Export
+                </button>
+                <button class="btn btn-danger" onclick="clearTour()">
+                  <span class="material-icons">delete</span>
+                  Clear
                 </button>
               </div>
-              <div class="chat-suggestions-sidebar">
-                <div class="suggestion-chip" onclick="sendQuickMessage('What are the best places to visit?')">🏛️ Best places</div>
-                <div class="suggestion-chip" onclick="sendQuickMessage('How is the weather?')">🌤️ Weather</div>
-                <div class="suggestion-chip" onclick="sendQuickMessage('Plan my route')">🗺️ Route help</div>
+            </div>
+          </div>
+
+          <div class="footer-text">
+            <small class="footer-small">Powered by <strong>Haerriz</strong> • © 2025</small>
+          </div>
+          
+          <!-- AI Assistant (Collapsible) -->
+          <div class="section-card collapsible">
+            <div class="section-header" onclick="toggleSection('ai-chat')">
+              <span class="material-icons">smart_toy</span>
+              <span>AI Assistant</span>
+              <span class="material-icons expand-icon">expand_more</span>
+            </div>
+            <div class="section-content" id="ai-chat">
+              <div class="ai-chat-container" id="aiChatContainer">
+                <div class="chat-messages-sidebar" id="chatMessages">
+                  <div class="welcome-message">
+                    <span class="material-icons">smart_toy</span>
+                    <p>Hi! Ask me about destinations, routes, or travel tips!</p>
+                  </div>
+                </div>
+                <div class="chat-input-sidebar">
+                  <input type="text" id="chatInput" placeholder="Ask about destinations, routes, weather..." />
+                  <button class="chat-send-sidebar" onclick="sendMessage()">
+                    <span class="material-icons">send</span>
+                  </button>
+                </div>
+                <div class="chat-suggestions-sidebar">
+                  <div class="suggestion-chip" onclick="sendQuickMessage('What are the best places to visit?')">🏛️ Places</div>
+                  <div class="suggestion-chip" onclick="sendQuickMessage('How is the weather?')">🌤️ Weather</div>
+                  <div class="suggestion-chip" onclick="sendQuickMessage('Plan my route')">🗺️ Route</div>
+                </div>
               </div>
             </div>
           </div>
@@ -467,6 +506,9 @@
   <!-- Modular Application Scripts -->
   <script src="assets/js/utils.js"></script>
   <script src="assets/js/map-manager.js"></script>
+  <script src="assets/js/location-manager.js"></script>
+  <script src="assets/js/nearby-places.js"></script>
+  <script src="assets/js/route-calculator.js"></script>
   <script src="assets/js/tour-manager.js"></script>
   <script src="assets/js/chat-manager.js"></script>
   <script src="assets/js/search-manager.js"></script>

@@ -261,3 +261,92 @@ window.addEventListener('DOMContentLoaded', () => {
     };
   }
 });
+// UI Section Toggle Functionality
+function toggleSection(sectionId) {
+  const section = document.getElementById(sectionId);
+  const card = section.closest('.section-card');
+  
+  if (card.classList.contains('expanded')) {
+    card.classList.remove('expanded');
+  } else {
+    card.classList.add('expanded');
+  }
+}
+
+// Search input enhancements
+function clearSearch() {
+  const searchInput = document.getElementById('startLocation');
+  const clearBtn = document.querySelector('.clear-search');
+  
+  searchInput.value = '';
+  clearBtn.style.display = 'none';
+  searchInput.focus();
+}
+
+function setupSearchInput() {
+  const searchInput = document.getElementById('startLocation');
+  const clearBtn = document.querySelector('.clear-search');
+  
+  if (searchInput && clearBtn) {
+    searchInput.addEventListener('input', (e) => {
+      if (e.target.value.length > 0) {
+        clearBtn.style.display = 'flex';
+      } else {
+        clearBtn.style.display = 'none';
+      }
+    });
+  }
+}
+
+// Auto-detect user location on load
+function autoDetectLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        // Center map on user location
+        if (window.mapManager) {
+          window.mapManager.centerOnLocation(latitude, longitude, 12);
+          window.mapManager.showUserLocation(latitude, longitude, position.coords.accuracy);
+        }
+        
+        // Load nearby places
+        setTimeout(() => {
+          if (window.loadNearbyPlaces) {
+            loadNearbyPlaces();
+          }
+        }, 1000);
+      },
+      (error) => {
+        console.log('Location access denied or unavailable');
+        // Fallback to default location (London)
+        if (window.mapManager) {
+          window.mapManager.centerOnLocation(51.505, -0.09, 10);
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000 // 5 minutes
+      }
+    );
+  }
+}
+
+// Auto-expand sections and setup on load
+window.addEventListener('DOMContentLoaded', () => {
+  // Setup search input
+  setupSearchInput();
+  
+  // Auto-detect location
+  setTimeout(autoDetectLocation, 1000);
+  
+  // Auto-expand nearby places section
+  setTimeout(() => {
+    const nearbySection = document.getElementById('nearby');
+    if (nearbySection) {
+      nearbySection.closest('.section-card').classList.add('expanded');
+    }
+  }, 2000);
+});
