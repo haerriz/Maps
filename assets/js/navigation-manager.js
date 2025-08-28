@@ -272,7 +272,7 @@ class NavigationManager {
 
   startLocationTracking() {
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by this browser.');
+      this.showNavigationError('Geolocation is not supported by this browser.');
       return;
     }
 
@@ -294,14 +294,53 @@ class NavigationManager {
         this.checkIfOffRoute();
       },
       (error) => {
-        console.error('Location tracking error:', error);
+        this.handleNavigationLocationError(error);
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 3000
+        timeout: 15000,
+        maximumAge: 5000
       }
     );
+  }
+
+  handleNavigationLocationError(error) {
+    let message = 'Navigation location error: ';
+    
+    switch (error.code) {
+      case error.PERMISSION_DENIED:
+        message += 'Location access denied. Navigation requires location permissions.';
+        break;
+      case error.POSITION_UNAVAILABLE:
+        message += 'Location unavailable. Please check your GPS signal.';
+        break;
+      case error.TIMEOUT:
+        message += 'Location timeout. Retrying...';
+        // Retry location tracking
+        setTimeout(() => {
+          if (this.isNavigating) {
+            this.startLocationTracking();
+          }
+        }, 5000);
+        return;
+      default:
+        message += 'Unknown location error occurred.';
+        break;
+    }
+    
+    console.error(message);
+    this.showNavigationError(message);
+  }
+
+  showNavigationError(message) {
+    const navInstruction = document.getElementById('navInstruction');
+    if (navInstruction) {
+      navInstruction.textContent = message;
+    }
+    
+    if (this.voiceEnabled) {
+      this.speakText('Navigation error occurred');
+    }
   }
 
   checkNavigationProgress() {
