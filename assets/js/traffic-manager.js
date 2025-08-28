@@ -77,29 +77,10 @@ class TrafficManager {
 
   async fetchTrafficData(bounds) {
     try {
-      // Use Overpass API to get real road data with traffic-relevant information
-      const overpassQuery = `
-        [out:json][timeout:25];
-        (
-          way["highway"~"^(motorway|trunk|primary|secondary|tertiary|residential)$"](${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()});
-        );
-        out geom;
-      `;
-      
-      const response = await fetch('https://overpass-api.de/api/interpreter', {
-        method: 'POST',
-        body: overpassQuery
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        this.processRealTrafficData(data.elements);
-      } else {
-        throw new Error('Overpass API failed');
-      }
-    } catch (error) {
-      console.warn('Real traffic data unavailable, using road-based analysis:', error);
+      // Skip Overpass API due to timeouts, use road-based analysis directly
       this.analyzeRoadTraffic(bounds);
+    } catch (error) {
+      console.warn('Traffic analysis failed:', error);
     }
   }
 
@@ -110,33 +91,35 @@ class TrafficManager {
     // Clear existing traffic layers
     this.clearTrafficLayers();
 
-    data.elements.forEach(way => {
-      if (way.geometry && way.geometry.length > 1) {
-        const coords = way.geometry.map(point => [point.lat, point.lon]);
-        
-        // Determine traffic level based on road type and simulate congestion
-        const trafficLevel = this.calculateTrafficLevel(way.tags);
-        const color = this.getTrafficColor(trafficLevel);
-        
-        const trafficLine = L.polyline(coords, {
-          color: color,
-          weight: 4,
-          opacity: 0.7,
-          className: 'traffic-overlay'
-        }).addTo(map);
-        
-        // Add popup with traffic info
-        trafficLine.bindPopup(`
-          <div style="font-size: 12px;">
-            <strong>${way.tags.name || 'Road'}</strong><br>
-            Type: ${way.tags.highway}<br>
-            Traffic: ${this.getTrafficDescription(trafficLevel)}
-          </div>
-        `);
-        
-        this.trafficLayers.push(trafficLine);
-      }
-    });
+    if (data && data.elements) {
+      data.elements.forEach(way => {
+        if (way.geometry && way.geometry.length > 1) {
+          const coords = way.geometry.map(point => [point.lat, point.lon]);
+          
+          // Determine traffic level based on road type and simulate congestion
+          const trafficLevel = this.calculateRealTrafficLevel(way.tags?.highway || 'unknown', way.tags?.maxspeed || '50', way.tags || {});
+          const color = this.getTrafficColor(trafficLevel);
+          
+          const trafficLine = L.polyline(coords, {
+            color: color,
+            weight: 4,
+            opacity: 0.7,
+            className: 'traffic-overlay'
+          }).addTo(map);
+          
+          // Add popup with traffic info
+          trafficLine.bindPopup(`
+            <div style="font-size: 12px;">
+              <strong>${way.tags?.name || 'Road'}</strong><br>
+              Type: ${way.tags?.highway}<br>
+              Traffic: ${this.getTrafficDescription(trafficLevel)}
+            </div>
+          `);
+          
+          this.trafficLayers.push(trafficLine);
+        }
+      });
+    }
   }
 
   calculateRealTrafficLevel(roadType, maxSpeed, tags) {
@@ -354,7 +337,11 @@ class TrafficManager {
     // Update traffic every 60 seconds to avoid rate limits
     this.updateInterval = setInterval(() => {
       if (this.trafficEnabled) {
-        this.simulateTrafficData(); // Use simulation to avoid API limits
+        const map = window.mapManager?.getMap();
+        if (map) {
+          const bounds = map.getBounds();
+          this.fetchTrafficData(bounds);
+        }
       }
     }, 60000);
   }

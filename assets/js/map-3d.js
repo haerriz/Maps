@@ -68,7 +68,7 @@ class Map3DManager {
   }
 
   addBuildingEffects() {
-    // Add minimal CSS for enhanced visuals
+    // Enhanced 3D visual effects with building-like shadows
     const style3D = document.createElement('style');
     style3D.id = 'map3DStyles';
     style3D.textContent = `
@@ -78,19 +78,82 @@ class Map3DManager {
       
       .map-3d-enhanced .leaflet-marker-icon {
         filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        transform: translateZ(10px);
       }
       
       .map-3d-enhanced .user-location-marker {
         filter: drop-shadow(0 3px 6px rgba(66, 133, 244, 0.5));
+        transform: translateZ(15px);
+      }
+      
+      /* Pseudo-building effects using map features */
+      .map-3d-enhanced .leaflet-tile {
+        transform-style: preserve-3d;
+      }
+      
+      /* Enhanced road elevation */
+      .map-3d-enhanced .leaflet-overlay-pane path[stroke] {
+        filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+        transform: translateZ(2px);
+      }
+      
+      /* Building-like blocks for urban areas */
+      .map-3d-enhanced .leaflet-tile-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, 
+          transparent 0%, 
+          rgba(0,0,0,0.02) 25%, 
+          transparent 50%, 
+          rgba(0,0,0,0.02) 75%, 
+          transparent 100%);
+        pointer-events: none;
+        z-index: 1;
       }
     `;
     
     document.head.appendChild(style3D);
+    
+    // Add terrain elevation effects
+    this.addTerrainEffects();
   }
 
   addPseudoBuildings() {
-    // Skip building generation to prevent performance issues
-    console.log('3D buildings disabled for performance');
+    // Add CSS-based building-like effects for urban visualization
+    if (!window.mapManager || !window.mapManager.map) return;
+    
+    const buildingStyle = document.createElement('style');
+    buildingStyle.id = 'pseudoBuildings';
+    buildingStyle.textContent = `
+      /* Urban area highlighting */
+      .leaflet-tile[src*="openstreetmap"] {
+        filter: contrast(1.1) brightness(0.98);
+      }
+      
+      /* Simulate building shadows on tiles */
+      .map-3d-enhanced .leaflet-tile-pane {
+        filter: 
+          drop-shadow(2px 2px 4px rgba(0,0,0,0.1))
+          drop-shadow(-1px -1px 2px rgba(255,255,255,0.1));
+      }
+      
+      /* Enhanced markers to look more 3D */
+      .map-3d-enhanced .leaflet-marker-pane .leaflet-marker-icon {
+        transform: perspective(100px) rotateX(5deg) translateZ(5px);
+        transition: transform 0.3s ease;
+      }
+      
+      .map-3d-enhanced .leaflet-marker-pane .leaflet-marker-icon:hover {
+        transform: perspective(100px) rotateX(5deg) translateZ(10px) scale(1.1);
+      }
+    `;
+    
+    document.head.appendChild(buildingStyle);
+    console.log('Enhanced 3D building effects applied');
   }
 
   removeBuildingEffects() {
@@ -150,8 +213,28 @@ class Map3DManager {
   updateBearing(heading) {
     if (!this.is3DMode) return;
     
-    // Skip bearing rotation to prevent disorientation
-    console.log('Bearing update:', heading);
+    // Smooth bearing rotation with limits to prevent disorientation
+    const normalizedHeading = ((heading % 360) + 360) % 360;
+    const currentBearing = this.bearing;
+    
+    // Calculate shortest rotation path
+    let bearingDiff = normalizedHeading - currentBearing;
+    if (bearingDiff > 180) bearingDiff -= 360;
+    if (bearingDiff < -180) bearingDiff += 360;
+    
+    // Apply gradual bearing change (max 5 degrees per update)
+    const maxChange = 5;
+    const actualChange = Math.max(-maxChange, Math.min(maxChange, bearingDiff));
+    this.bearing = ((currentBearing + actualChange) % 360 + 360) % 360;
+    
+    // Apply rotation to map container
+    const mapContainer = document.getElementById('map');
+    if (mapContainer) {
+      mapContainer.style.transform = `perspective(2000px) rotateX(${this.tiltAngle}deg) rotateZ(${-this.bearing}deg)`;
+      mapContainer.style.transition = 'transform 0.5s ease-out';
+    }
+    
+    console.log(`Bearing updated: ${currentBearing}° → ${this.bearing}° (heading: ${normalizedHeading}°)`);
   }
 
   adjustTilt(angle) {

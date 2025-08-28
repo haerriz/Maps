@@ -99,18 +99,47 @@ class Utils {
     }
   }
   
-  // Fallback currency rates (static data)
-  static getFallbackRates() {
-    return {
-      EUR: 0.85,
-      GBP: 0.73,
-      JPY: 110.0,
-      AUD: 1.35,
-      CAD: 1.25,
-      CHF: 0.92,
-      CNY: 6.45,
-      INR: 74.5
-    };
+  // Real currency rates from multiple free APIs
+  static async getFallbackRates() {
+    try {
+      // Try exchangerate-api.com (free, no key required)
+      const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+      if (response.ok) {
+        const data = await response.json();
+        return data.rates;
+      }
+    } catch (error) {
+      console.warn('exchangerate-api.com failed, trying exchangerate.host');
+    }
+    
+    try {
+      // Try exchangerate.host (completely free, no key)
+      const response = await fetch('https://api.exchangerate.host/latest?base=USD');
+      if (response.ok) {
+        const data = await response.json();
+        return data.rates;
+      }
+    } catch (error) {
+      console.warn('exchangerate.host failed, trying floatrates');
+    }
+    
+    try {
+      // Try floatrates (free, no key)
+      const response = await fetch('https://www.floatrates.com/daily/usd.json');
+      if (response.ok) {
+        const data = await response.json();
+        const rates = { USD: 1 };
+        Object.keys(data).forEach(key => {
+          rates[key.toUpperCase()] = data[key].rate;
+        });
+        return rates;
+      }
+    } catch (error) {
+      console.error('All currency APIs failed');
+    }
+    
+    // Final fallback: return empty object to indicate failure
+    return {};
   }
   
   // Weather icon mapping

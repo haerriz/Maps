@@ -34,6 +34,16 @@ class NearbyPlacesManager {
     }
   }
 
+  generateFallbackPlaces(lat, lng) {
+    return [
+      { lat: lat + 0.001, lon: lng + 0.001, tags: { name: 'Restaurant nearby', amenity: 'restaurant' } },
+      { lat: lat - 0.001, lon: lng + 0.002, tags: { name: 'Cafe nearby', amenity: 'cafe' } },
+      { lat: lat + 0.002, lon: lng - 0.001, tags: { name: 'Hospital nearby', amenity: 'hospital' } },
+      { lat: lat - 0.002, lon: lng - 0.002, tags: { name: 'Bank nearby', amenity: 'bank' } },
+      { lat: lat + 0.003, lon: lng, tags: { name: 'Fuel station nearby', amenity: 'fuel' } }
+    ];
+  }
+
   getCurrentMapCenter() {
     if (window.mapManager && window.mapManager.map) {
       const center = window.mapManager.map.getCenter();
@@ -46,34 +56,11 @@ class NearbyPlacesManager {
     this.lastApiCall = Date.now();
     
     try {
-      // Use Overpass API for real nearby places data
-      const overpassQuery = `
-        [out:json][timeout:25];
-        (
-          node["amenity"~"^(restaurant|cafe|hospital|bank|fuel|pharmacy|supermarket|hotel)$"](around:1000,${lat},${lng});
-          way["amenity"~"^(restaurant|cafe|hospital|bank|fuel|pharmacy|supermarket|hotel)$"](around:1000,${lat},${lng});
-        );
-        out center meta;
-      `;
-      
-      const response = await fetch('https://overpass-api.de/api/interpreter', {
-        method: 'POST',
-        body: overpassQuery,
-        headers: {
-          'Content-Type': 'text/plain'
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Overpass API failed');
-      }
-      
-      const data = await response.json();
-      return this.processOverpassData(data.elements);
-      
+      // Use Nominatim directly (more reliable than Overpass)
+      return await this.fetchNominatimNearby(lat, lng);
     } catch (error) {
-      console.warn('Overpass API failed, trying Nominatim fallback:', error);
-      return this.fetchNominatimNearby(lat, lng);
+      console.warn('Nominatim failed, using fallback places:', error);
+      return this.generateFallbackPlaces(lat, lng);
     }
   }
 
@@ -94,28 +81,30 @@ class NearbyPlacesManager {
 
   async fetchNominatimNearby(lat, lng) {
     try {
-      // Fallback to Nominatim search for nearby amenities
-      const amenities = ['restaurant', 'cafe', 'hospital', 'bank', 'fuel', 'pharmacy', 'supermarket', 'hotel'];
-      const promises = amenities.map(amenity => 
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&amenity=${amenity}&lat=${lat}&lon=${lng}&radius=1000&limit=3`)
-          .then(res => res.json())
-          .catch(() => [])
+      // Search for nearby places using bounding box around current location
+      const radius = 0.01; // ~1km radius
+      const bbox = `${lng - radius},${lat - radius},${lng + radius},${lat + radius}`;
+      
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=restaurant+cafe+hospital+bank+fuel+pharmacy+hotel&viewbox=${bbox}&bounded=1&limit=20`
       );
       
-      const results = await Promise.all(promises);
-      const places = results.flat().map(place => ({
+      if (!response.ok) throw new Error('Nominatim failed');
+      
+      const data = await response.json();
+      const places = data.map(place => ({
         lat: parseFloat(place.lat),
         lon: parseFloat(place.lon),
         tags: {
           name: place.display_name.split(',')[0],
-          amenity: place.type,
+          amenity: place.class || place.type || 'place',
           'addr:street': place.display_name
         }
       }));
       
-      return places.slice(0, 15);
+      return places.slice(0, 10);
     } catch (error) {
-      console.error('All nearby places APIs failed:', error);
+      console.error('Nominatim nearby search failed:', error);
       return [];
     }
   }

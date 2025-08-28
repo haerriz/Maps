@@ -9,9 +9,9 @@ class TourManager {
     this.updateStats();
   }
 
-  addStop(latlng) {
+  async addStop(latlng) {
     // Use provided name or generate based on location type
-    const stopName = latlng.name || this.generateStopName(latlng);
+    const stopName = latlng.name || await this.generateStopName(latlng);
     
     this.stops.push({
       lat: latlng.lat,
@@ -30,16 +30,32 @@ class TourManager {
     }
   }
 
-  generateStopName(latlng) {
+  async generateStopName(latlng) {
     // If it's user location, keep that name
     if (latlng.name === 'My Location') return 'My Location';
     
-    // Otherwise generate based on position
-    if (this.stops.length === 0) {
-      return 'Starting Point';
-    } else {
-      return `Stop ${this.stops.length + 1}`;
+    // Try reverse geocoding for real location name
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}&zoom=18&addressdetails=1`
+      );
+      const data = await response.json();
+      
+      if (data && data.display_name) {
+        // Extract meaningful location name
+        const address = data.address || {};
+        const name = address.amenity || address.shop || address.building || 
+                    address.house_number && address.road ? `${address.house_number} ${address.road}` :
+                    address.road || address.suburb || address.city || 
+                    data.display_name.split(',')[0];
+        return name || (this.stops.length === 0 ? 'Starting Point' : `Stop ${this.stops.length + 1}`);
+      }
+    } catch (error) {
+      console.warn('Reverse geocoding failed:', error);
     }
+    
+    // Fallback to generic names
+    return this.stops.length === 0 ? 'Starting Point' : `Stop ${this.stops.length + 1}`;
   }
 
   removeStop(index) {

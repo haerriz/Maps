@@ -31,9 +31,25 @@ const CONFIG = {
   
   // Default Settings
   DEFAULT_ZOOM: 13,
-  DEFAULT_CENTER: [51.505, -0.09], // London
+  DEFAULT_CENTER: null, // Will be set dynamically based on user location
   MAX_ZOOM: 18,
   MIN_ZOOM: 2,
+  
+  // Initialize user location
+  async initializeLocation() {
+    try {
+      const userLocation = await Utils.getUserLocation();
+      if (userLocation) {
+        this.DEFAULT_CENTER = [userLocation.lat, userLocation.lng];
+        return this.DEFAULT_CENTER;
+      }
+    } catch (error) {
+      console.warn('Could not get user location, using fallback');
+    }
+    // Fallback to London if location detection fails
+    this.DEFAULT_CENTER = [51.505, -0.09];
+    return this.DEFAULT_CENTER;
+  },
   
   // Rate Limiting
   RATE_LIMIT: {
