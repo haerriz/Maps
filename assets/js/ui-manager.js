@@ -299,7 +299,29 @@ function setupSearchInput() {
 }
 
 // Auto-detect user location on load
-function autoDetectLocation() {
+async function autoDetectLocation() {
+  if (!navigator.geolocation) {
+    console.log('Geolocation not supported');
+    if (window.mapManager) {
+      window.mapManager.centerOnLocation(51.505, -0.09, 10);
+    }
+    return;
+  }
+
+  // Check permissions silently
+  try {
+    const permission = await navigator.permissions.query({name: 'geolocation'});
+    if (permission.state === 'denied') {
+      console.log('Geolocation denied, using default location');
+      if (window.mapManager) {
+        window.mapManager.centerOnLocation(51.505, -0.09, 10);
+      }
+      return;
+    }
+  } catch (error) {
+    console.log('Permissions API not supported');
+  }
+
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
       (position) => {

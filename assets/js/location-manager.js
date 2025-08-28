@@ -4,10 +4,21 @@ class LocationManager {
     this.userLocation = null;
   }
 
-  useMyLocation() {
+  async useMyLocation() {
     if (!navigator.geolocation) {
       this.showLocationError('Geolocation is not supported by this browser.');
       return;
+    }
+
+    // Check permissions first
+    try {
+      const permission = await navigator.permissions.query({name: 'geolocation'});
+      if (permission.state === 'denied') {
+        this.showLocationError('Geolocation access is denied. Please enable location permissions in your browser settings.');
+        return;
+      }
+    } catch (error) {
+      console.log('Permissions API not supported, proceeding with geolocation request');
     }
 
     navigator.geolocation.getCurrentPosition(
@@ -76,11 +87,23 @@ class LocationManager {
     }
   }
 
-  autoDetectLocation() {
+  async autoDetectLocation() {
     if (!navigator.geolocation) {
       console.log('Geolocation not supported, using default location');
       this.useDefaultLocation();
       return;
+    }
+
+    // Check permissions silently for auto-detection
+    try {
+      const permission = await navigator.permissions.query({name: 'geolocation'});
+      if (permission.state === 'denied') {
+        console.log('Geolocation denied, using default location');
+        this.useDefaultLocation();
+        return;
+      }
+    } catch (error) {
+      console.log('Permissions API not supported, proceeding with geolocation request');
     }
 
     navigator.geolocation.getCurrentPosition(

@@ -270,10 +270,21 @@ class NavigationManager {
     return eta.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  startLocationTracking() {
+  async startLocationTracking() {
     if (!navigator.geolocation) {
       this.showNavigationError('Geolocation is not supported by this browser.');
       return;
+    }
+
+    // Check permissions for navigation
+    try {
+      const permission = await navigator.permissions.query({name: 'geolocation'});
+      if (permission.state === 'denied') {
+        this.showNavigationError('Location access denied. Navigation requires location permissions.');
+        return;
+      }
+    } catch (error) {
+      console.log('Permissions API not supported, proceeding with location tracking');
     }
 
     this.watchId = navigator.geolocation.watchPosition(
