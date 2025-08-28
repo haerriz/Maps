@@ -27,42 +27,47 @@ class LocationInitializer {
   }
   
   static async initializeWithBrowserLocation() {
-    return new Promise((resolve) => {
+    try {
       if (!navigator.geolocation) {
-        console.warn('Geolocation not supported');
-        resolve(null);
-        return;
+        console.warn('Geolocation not supported, using IP location');
+        return await LocationInitializer.initializeUserLocation();
       }
       
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const location = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            accuracy: position.coords.accuracy
-          };
-          
-          CONFIG.DEFAULT_CENTER = [location.lat, location.lng];
-          
-          if (window.mapManager && window.mapManager.map) {
-            window.mapManager.map.setView([location.lat, location.lng], CONFIG.DEFAULT_ZOOM);
+      return new Promise((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const location = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+              accuracy: position.coords.accuracy
+            };
+            
+            CONFIG.DEFAULT_CENTER = [location.lat, location.lng];
+            
+            if (window.mapManager && window.mapManager.map) {
+              window.mapManager.map.setView([location.lat, location.lng], CONFIG.DEFAULT_ZOOM);
+            }
+            
+            console.log('Browser location initialized:', location);
+            resolve(location);
+          },
+          async (error) => {
+            console.warn('Browser geolocation failed:', error.message);
+            // Fallback to IP-based location
+            const ipLocation = await LocationInitializer.initializeUserLocation();
+            resolve(ipLocation);
+          },
+          {
+            enableHighAccuracy: false,
+            timeout: 5000,
+            maximumAge: 600000 // 10 minutes
           }
-          
-          console.log('Browser location initialized:', location);
-          resolve(location);
-        },
-        (error) => {
-          console.warn('Browser geolocation failed:', error.message);
-          // Fallback to IP-based location
-          LocationInitializer.initializeUserLocation().then(resolve);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 300000 // 5 minutes
-        }
-      );
-    });
+        );
+      });
+    } catch (error) {
+      console.warn('Geolocation error, using IP location:', error);
+      return await LocationInitializer.initializeUserLocation();
+    }
   }
 }
 
