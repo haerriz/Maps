@@ -271,45 +271,37 @@ class NavigationManager {
   }
 
   startLocationTracking() {
-    // Location tracking disabled - use simulated navigation
-    console.log('Location tracking disabled - using simulated navigation');
-    this.simulateLocationTracking();
-  }
+    if (!navigator.geolocation) {
+      this.showNavigationError('Geolocation is not supported by this browser.');
+      return;
+    }
 
-  simulateLocationTracking() {
-    // Simulate location updates for navigation demo
-    let stepIndex = 0;
-    this.simulationInterval = setInterval(() => {
-      if (!this.isNavigating || stepIndex >= this.navigationSteps.length) {
-        clearInterval(this.simulationInterval);
-        return;
-      }
-
-      const currentStep = this.navigationSteps[stepIndex];
-      if (currentStep && currentStep.coordinates && currentStep.coordinates.length > 0) {
-        const coord = currentStep.coordinates[0];
-        this.currentPosition = {
-          lat: coord[0],
-          lng: coord[1],
-          heading: 0,
-          speed: 50 // Simulated speed
+    this.watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const newPosition = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          heading: position.coords.heading || 0,
+          speed: position.coords.speed || 0
         };
-
-        this.updateSpeed(this.currentPosition);
-        this.updateUserLocationMarker(this.currentPosition);
         
-        // Move to next step
-        stepIndex++;
-        this.currentStep = stepIndex;
+        this.updateSpeed(newPosition);
+        this.currentHeading = newPosition.heading;
+        this.updateUserLocationMarker(newPosition);
         
-        if (stepIndex < this.navigationSteps.length) {
-          this.updateNavigationDisplay();
-          this.speakInstruction(this.navigationSteps[stepIndex]);
-        } else {
-          this.arriveAtDestination();
-        }
+        this.currentPosition = newPosition;
+        this.checkNavigationProgress();
+        this.checkIfOffRoute();
+      },
+      (error) => {
+        this.handleNavigationLocationError(error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 5000
       }
-    }, 5000); // Update every 5 seconds for demo
+    );
   }
 
   handleNavigationLocationError(error) {
@@ -607,16 +599,48 @@ class NavigationManager {
   }
 
   getTrafficColorForStep(step) {
-    // Simulate traffic based on road type and time
+    // Analyze real road characteristics for traffic estimation
     const hour = new Date().getHours();
-    const isRushHour = (hour >= 7 && hour <= 9) || (hour >= 17 && hour <= 19);
+    const day = new Date().getDay();
+    const isWeekend = day === 0 || day === 6;
+    const isRushHour = !isWeekend && ((hour >= 7 && hour <= 9) || (hour >= 17 && hour <= 19));
+    const isBusinessHours = !isWeekend && hour >= 9 && hour <= 17;
     
-    if (step.roadName && step.roadName.toLowerCase().includes('highway')) {
-      return isRushHour ? '#ea4335' : '#fbbc04';
-    } else if (step.roadName && step.roadName.toLowerCase().includes('main')) {
-      return isRushHour ? '#fbbc04' : '#34a853';
+    let trafficLevel = 0.2; // Base traffic level
+    
+    // Analyze road name for type classification
+    const roadName = (step.roadName || '').toLowerCase();
+    
+    if (roadName.includes('highway') || roadName.includes('motorway') || roadName.includes('freeway')) {
+      trafficLevel = isRushHour ? 0.8 : (isBusinessHours ? 0.5 : 0.3);
+    } else if (roadName.includes('main') || roadName.includes('primary') || roadName.includes('avenue')) {
+      trafficLevel = isRushHour ? 0.7 : (isBusinessHours ? 0.4 : 0.2);
+    } else if (roadName.includes('street') || roadName.includes('road')) {
+      trafficLevel = isRushHour ? 0.6 : (isBusinessHours ? 0.3 : 0.2);
+    } else if (roadName.includes('lane') || roadName.includes('drive') || roadName.includes('residential')) {
+      trafficLevel = isRushHour ? 0.4 : 0.2;
     }
-    return '#34a853';
+    
+    // Weekend adjustments
+    if (isWeekend) {
+      if (hour >= 10 && hour <= 18) {
+        trafficLevel *= 0.7; // Weekend shopping/leisure traffic
+      } else {
+        trafficLevel *= 0.4; // Low weekend traffic
+      }
+    }
+    
+    // Distance-based adjustment (longer segments may have different traffic)
+    if (step.distance > 5000) { // > 5km suggests highway
+      trafficLevel *= 1.2;
+    } else if (step.distance < 500) { // < 500m suggests city streets
+      trafficLevel *= 0.8;
+    }
+    
+    // Convert traffic level to color
+    if (trafficLevel >= 0.7) return '#ea4335'; // Heavy (red)
+    if (trafficLevel >= 0.4) return '#fbbc04'; // Moderate (yellow)
+    return '#34a853'; // Light (green)
   }
 
   getTrafficText(step) {
@@ -659,10 +683,10 @@ class NavigationManager {
       window.map3DManager.disable3DMode();
     }
     
-    // Stop simulation interval
-    if (this.simulationInterval) {
-      clearInterval(this.simulationInterval);
-      this.simulationInterval = null;
+    // Stop location tracking
+    if (this.watchId) {
+      navigator.geolocation.clearWatch(this.watchId);
+      this.watchId = null;
     }
     
     // Remove navigation UI

@@ -300,18 +300,39 @@ function setupSearchInput() {
 
 // Auto-detect user location on load
 function autoDetectLocation() {
-  // Geolocation disabled - use default location
-  console.log('Auto-location disabled, using default location (London)');
-  if (window.mapManager) {
-    window.mapManager.centerOnLocation(51.505, -0.09, 10);
-  }
-  
-  // Load nearby places for default location
-  setTimeout(() => {
-    if (window.loadNearbyPlaces) {
-      loadNearbyPlaces();
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        if (window.mapManager) {
+          window.mapManager.centerOnLocation(latitude, longitude, 12);
+          window.mapManager.showUserLocation(latitude, longitude, position.coords.accuracy);
+        }
+        
+        setTimeout(() => {
+          if (window.loadNearbyPlaces) {
+            loadNearbyPlaces();
+          }
+        }, 1000);
+      },
+      (error) => {
+        console.log('Location access denied, using default location');
+        if (window.mapManager) {
+          window.mapManager.centerOnLocation(51.505, -0.09, 10);
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000
+      }
+    );
+  } else {
+    if (window.mapManager) {
+      window.mapManager.centerOnLocation(51.505, -0.09, 10);
     }
-  }, 1000);
+  }
 }
 
 // Auto-expand sections and setup on load

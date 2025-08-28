@@ -4,25 +4,48 @@ class LocationManager {
     this.userLocation = null;
   }
 
-  useMyLocation() {
-    // Geolocation disabled - prompt user to search for location
-    this.showLocationPrompt();
+  async useMyLocation() {
+    if (!navigator.geolocation) {
+      this.showLocationError('Geolocation is not supported by this browser.');
+      return;
+    }
+
+    try {
+      const position = await this.requestLocationPermission();
+      
+      const latlng = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+        name: 'My Location'
+      };
+      
+      this.userLocation = latlng;
+      
+      if (window.mapManager) {
+        window.mapManager.showUserLocation(latlng.lat, latlng.lng, position.coords.accuracy);
+        window.mapManager.centerOnLocation(latlng.lat, latlng.lng, 15);
+      }
+      
+      if (window.tourManager && window.tourManager.stops.length === 0) {
+        window.tourManager.addStop(latlng);
+      }
+    } catch (error) {
+      this.handleGeolocationError(error);
+    }
   }
 
-  showLocationPrompt() {
-    const searchInput = document.getElementById('startLocation');
-    if (searchInput) {
-      searchInput.focus();
-      searchInput.placeholder = 'Enter your current location (e.g., New York, London, Tokyo)';
-      searchInput.style.borderColor = '#4285f4';
-      searchInput.style.boxShadow = '0 0 0 2px rgba(66, 133, 244, 0.2)';
-    }
-    
-    if (window.chatManager) {
-      window.chatManager.addMessage('Please search for your location in the search box above to get started!', 'ai');
-    } else {
-      alert('Please search for your location using the search box to get started.');
-    }
+  requestLocationPermission() {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        resolve,
+        reject,
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 300000
+        }
+      );
+    });
   }
 
   handleGeolocationError(error) {
@@ -60,10 +83,37 @@ class LocationManager {
     }
   }
 
-  autoDetectLocation() {
-    // Auto-detect disabled - use default location
-    console.log('Auto-location disabled, using default location');
-    this.useDefaultLocation();
+  async autoDetectLocation() {
+    if (!navigator.geolocation) {
+      console.log('Geolocation not supported, using default location');
+      this.useDefaultLocation();
+      return;
+    }
+
+    try {
+      const position = await this.requestLocationPermission();
+      const { latitude, longitude } = position.coords;
+      
+      this.userLocation = {
+        lat: latitude,
+        lng: longitude,
+        name: 'My Location'
+      };
+      
+      if (window.mapManager) {
+        window.mapManager.centerOnLocation(latitude, longitude, 12);
+        window.mapManager.showUserLocation(latitude, longitude, position.coords.accuracy);
+      }
+      
+      setTimeout(() => {
+        if (window.nearbyPlacesManager) {
+          window.nearbyPlacesManager.loadNearbyPlaces();
+        }
+      }, 1000);
+    } catch (error) {
+      console.log('Location access denied, using default location');
+      this.useDefaultLocation();
+    }
   }
 
   useDefaultLocation() {

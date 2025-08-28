@@ -66,60 +66,120 @@ class ChatManager {
   }
 
   generateAIResponse(userMessage) {
-    const responses = this.getContextualResponse(userMessage.toLowerCase());
-    const response = responses[Math.floor(Math.random() * responses.length)];
+    // Use intelligent contextual analysis instead of external APIs
+    const response = this.getIntelligentResponse(userMessage.toLowerCase());
     this.addMessage(response, 'ai');
   }
 
-  getContextualResponse(message) {
-    if (message.includes('weather')) {
-      return [
-        "I can help you check weather for your destinations! Add some stops to your journey and I'll get weather forecasts.",
-        "Weather is important for trip planning. Use the 'Weather Info' button to get forecasts for your route.",
-        "I'll check weather conditions along your route. Make sure to add your destinations first!"
-      ];
-    }
+  getIntelligentResponse(message) {
+    // Analyze user intent and provide contextual responses
+    const context = this.analyzeUserContext();
+    const intent = this.detectIntent(message);
     
-    if (message.includes('route') || message.includes('plan')) {
-      return [
-        "Great! Click on the map to add stops, then hit 'Start Journey' to see your optimized route.",
-        "I can help optimize your route! Add multiple stops and I'll find the best path considering traffic and distance.",
-        "For route planning, try adding destinations using the search box or clicking on the map. I'll handle the optimization!"
-      ];
+    switch (intent) {
+      case 'weather':
+        return this.getWeatherResponse(context);
+      case 'route':
+        return this.getRouteResponse(context);
+      case 'traffic':
+        return this.getTrafficResponse(context);
+      case 'places':
+        return this.getPlacesResponse(context);
+      case 'help':
+        return this.getHelpResponse(context);
+      case 'location':
+        return this.getLocationResponse(message, context);
+      default:
+        return this.getContextualResponse(message, context);
     }
-    
-    if (message.includes('traffic')) {
-      return [
-        "Enable 'Live Traffic' in preferences to see real-time traffic conditions on your routes.",
-        "Traffic data helps optimize your journey timing. Toggle it on in the Travel Preferences section.",
-        "I monitor traffic conditions to suggest the best departure times and routes for your trip."
-      ];
-    }
-    
-    if (message.includes('best places') || message.includes('attractions')) {
-      return [
-        "Try the quick location chips below for popular destinations, or search for specific attractions in the search box.",
-        "I can suggest great places! What type of destinations interest you - cities, landmarks, or natural attractions?",
-        "Use the location search to find attractions, restaurants, and points of interest worldwide."
-      ];
-    }
-    
-    if (message.includes('help') || message.includes('how')) {
-      return [
-        "I'm here to help! Click on the map to add stops, use the search box for locations, or ask me about travel tips.",
-        "You can plan trips by adding stops, choosing transport modes, and setting preferences. What would you like to know?",
-        "I can assist with route planning, weather info, travel suggestions, and trip optimization. What do you need help with?"
-      ];
-    }
+  }
 
-    // Default responses
-    return [
-      "That's interesting! I can help you plan routes, check weather, and find great destinations. What would you like to explore?",
-      "I'm your AI travel assistant! I can help optimize routes, suggest destinations, and provide travel insights. How can I assist?",
-      "Great question! I specialize in trip planning and travel optimization. Try adding some destinations to get started!",
-      "I'm here to make your travel planning easier! Add stops to your journey and I'll help optimize everything.",
-      "Let me help you plan the perfect trip! Use the map or search to add destinations, and I'll handle the rest."
-    ];
+  analyzeUserContext() {
+    const stops = window.tourManager?.getTourStops() || [];
+    const hasRoute = stops.length >= 2;
+    const hasStops = stops.length > 0;
+    const trafficEnabled = document.getElementById('trafficToggle')?.checked || false;
+    
+    return {
+      stopCount: stops.length,
+      hasRoute,
+      hasStops,
+      trafficEnabled,
+      lastStop: stops[stops.length - 1]?.name
+    };
+  }
+
+  detectIntent(message) {
+    const intents = {
+      weather: ['weather', 'temperature', 'rain', 'sunny', 'forecast', 'climate'],
+      route: ['route', 'plan', 'journey', 'trip', 'navigate', 'directions'],
+      traffic: ['traffic', 'congestion', 'busy', 'jam', 'delay'],
+      places: ['places', 'attractions', 'restaurants', 'hotels', 'visit', 'see'],
+      help: ['help', 'how', 'what', 'guide', 'tutorial'],
+      location: ['where', 'location', 'address', 'find', 'search']
+    };
+    
+    for (const [intent, keywords] of Object.entries(intents)) {
+      if (keywords.some(keyword => message.includes(keyword))) {
+        return intent;
+      }
+    }
+    
+    return 'general';
+  }
+
+  getWeatherResponse(context) {
+    if (context.hasStops) {
+      return `I can check the weather for your ${context.stopCount} destination${context.stopCount > 1 ? 's' : ''}! Click the Weather button to get current conditions and forecasts for your trip.`;
+    }
+    return "Add some destinations to your trip first, then I can provide weather forecasts for each location to help you plan better!";
+  }
+
+  getRouteResponse(context) {
+    if (context.hasRoute) {
+      return `Great! You have ${context.stopCount} stops planned. Your route is optimized for the best path. You can start navigation or add more destinations.`;
+    } else if (context.hasStops) {
+      return "You have one location added. Add at least one more destination to create a route, then I can optimize the path for you!";
+    }
+    return "Let's plan your route! Click on the map or use the search box to add destinations. I'll optimize the best path between all your stops.";
+  }
+
+  getTrafficResponse(context) {
+    if (context.trafficEnabled) {
+      return "Traffic monitoring is active! I'm showing real-time traffic conditions on your route. Green means light traffic, yellow is moderate, and red indicates heavy congestion.";
+    }
+    return "Enable 'Live Traffic' in the settings to see real-time traffic conditions. This helps me suggest the best departure times and alternate routes.";
+  }
+
+  getPlacesResponse(context) {
+    if (context.hasStops) {
+      return `I can find interesting places near ${context.lastStop || 'your destinations'}! Check the Nearby Places section for restaurants, hotels, and attractions.`;
+    }
+    return "Add some destinations first, then I can suggest nearby restaurants, attractions, hotels, and other points of interest for your trip!";
+  }
+
+  getLocationResponse(message, context) {
+    if (message.includes('where am i') || message.includes('my location')) {
+      return "Click the 'My Location' button to center the map on your current position, or use the search box to find any location worldwide.";
+    }
+    return "Use the search box to find any city, address, or landmark. I can also help you discover popular destinations - just tell me what type of place you're looking for!";
+  }
+
+  getHelpResponse(context) {
+    if (context.hasRoute) {
+      return "You're all set with your route! You can start navigation, check weather, find nearby places, or add more stops. What would you like to do next?";
+    }
+    return "I'm here to help you plan the perfect trip! Start by adding destinations using the search box or clicking on the map. I'll optimize routes, show traffic, and provide weather info.";
+  }
+
+  getContextualResponse(message, context) {
+    // Provide intelligent contextual responses based on current state
+    if (context.hasRoute) {
+      return "Your trip is looking good! I can help with navigation, weather updates, finding nearby attractions, or optimizing your route further. What interests you?";
+    } else if (context.hasStops) {
+      return "You've added one location. Add another destination to create a route, and I'll help optimize the best path with real-time traffic and weather considerations.";
+    }
+    return "Welcome to your AI travel assistant! I can help plan routes, check weather, find attractions, and optimize your journey. Start by adding some destinations to get personalized recommendations.";
   }
 
   clearChat() {
