@@ -245,10 +245,27 @@ input:checked + .slider:before {
 }
 
 .ai-message-sidebar {
-  background: #f1f3f4;
-  color: #202124;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
   margin-right: auto;
   border-bottom-left-radius: 4px;
+}
+
+/* Typing indicator */
+.typing-indicator {
+  padding: 12px 16px;
+}
+
+.typing-dots {
+  display: inline-block;
+  animation: typing 1.5s infinite;
+  font-size: 16px;
+  color: var(--accent-color);
+}
+
+@keyframes typing {
+  0%, 60%, 100% { opacity: 0.3; }
+  30% { opacity: 1; }
 }
 
 /* Responsive Adjustments */

@@ -65,10 +65,21 @@ class ChatManager {
     this.messages.push({ text, sender, timestamp: new Date() });
   }
 
-  generateAIResponse(userMessage) {
-    // Use intelligent contextual analysis instead of external APIs
-    const response = this.getIntelligentResponse(userMessage.toLowerCase());
-    this.addMessage(response, 'ai');
+  async generateAIResponse(userMessage) {
+    // Show typing indicator
+    this.showTypingIndicator();
+    
+    try {
+      // Use free AI API for real responses
+      const response = await this.getAIResponse(userMessage);
+      this.hideTypingIndicator();
+      this.addMessage(response, 'ai');
+    } catch (error) {
+      this.hideTypingIndicator();
+      // Fallback to intelligent responses if AI API fails
+      const fallbackResponse = this.getIntelligentResponse(userMessage.toLowerCase());
+      this.addMessage(fallbackResponse, 'ai');
+    }
   }
 
   getIntelligentResponse(message) {
@@ -172,14 +183,99 @@ class ChatManager {
     return "I'm here to help you plan the perfect trip! Start by adding destinations using the search box or clicking on the map. I'll optimize routes, show traffic, and provide weather info.";
   }
 
-  getContextualResponse(message, context) {
-    // Provide intelligent contextual responses based on current state
-    if (context.hasRoute) {
-      return "Your trip is looking good! I can help with navigation, weather updates, finding nearby attractions, or optimizing your route further. What interests you?";
-    } else if (context.hasStops) {
-      return "You've added one location. Add another destination to create a route, and I'll help optimize the best path with real-time traffic and weather considerations.";
+  async getAIResponse(userMessage) {
+    const context = this.analyzeUserContext();
+    const systemPrompt = this.buildSystemPrompt(context);
+    
+    // Use Hugging Face Inference API (free)
+    if (location.protocol !== 'file:') {
+      try {
+        const response = await fetch('https://api-inference.huggingface.co/models/microsoft/DialoGPT-medium', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            inputs: `${systemPrompt}\n\nUser: ${userMessage}\nAI Assistant:`
+          })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          return data[0]?.generated_text?.split('AI Assistant:')[1]?.trim() || this.getIntelligentResponse(userMessage);
+        }
+      } catch (error) {
+        console.log('AI API failed, using fallback');
+      }
     }
-    return "Welcome to your AI travel assistant! I can help plan routes, check weather, find attractions, and optimize your journey. Start by adding some destinations to get personalized recommendations.";
+    
+    // Fallback to intelligent responses
+    return this.getIntelligentResponse(userMessage);
+  }
+
+  buildSystemPrompt(context) {
+    let prompt = "You are a helpful AI travel assistant for Haerriz Maps. ";
+    
+    if (context.hasRoute) {
+      prompt += `The user has planned a route with ${context.stopCount} stops. `;
+    } else if (context.hasStops) {
+      prompt += `The user has added ${context.stopCount} location(s) but needs more for a complete route. `;
+    } else {
+      prompt += "The user hasn't added any destinations yet. ";
+    }
+    
+    if (context.trafficEnabled) {
+      prompt += "Live traffic monitoring is enabled. ";
+    }
+    
+    prompt += "Provide helpful, concise travel advice and suggestions. Keep responses under 100 words.";
+    
+    return prompt;
+  }
+
+  showTypingIndicator() {
+    if (!this.chatMessages) return;
+    
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message-sidebar ai-message-sidebar typing-indicator';
+    typingDiv.innerHTML = '<span class="typing-dots">●●●</span>';
+    
+    this.chatMessages.appendChild(typingDiv);
+    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+  }
+
+  hideTypingIndicator() {
+    const typingIndicator = this.chatMessages?.querySelector('.typing-indicator');
+    if (typingIndicator) {
+      typingIndicator.remove();
+    }
+  }
+
+  getContextualResponse(message, context) {
+    // Enhanced fallback responses
+    const responses = {
+      hasRoute: [
+        "Your route looks great! I can help optimize timing, find rest stops, or suggest scenic detours. What would you like to explore?",
+        "Perfect! With your route planned, I can provide weather updates, traffic alerts, or recommend attractions along the way.",
+        "Excellent planning! Need help with departure times, fuel stops, or finding interesting places to visit?"
+      ],
+      hasStops: [
+        "You're off to a good start! Add another destination to create an optimized route with real-time traffic data.",
+        "Great choice of location! Add more stops and I'll calculate the most efficient path for your journey."
+      ],
+      empty: [
+        "Ready to plan an amazing trip? Start by searching for destinations or clicking on the map. I'll help optimize everything!",
+        "Let's create your perfect journey! Add some destinations and I'll provide weather, traffic, and local recommendations.",
+        "Welcome! I'm here to make trip planning effortless. Search for places or ask me about any destination worldwide."
+      ]
+    };
+    
+    let categoryKey = 'empty';
+    if (context.hasRoute) categoryKey = 'hasRoute';
+    else if (context.hasStops) categoryKey = 'hasStops';
+    
+    const categoryResponses = responses[categoryKey];
+    return categoryResponses[Math.floor(Math.random() * categoryResponses.length)];
   }
 
   clearChat() {
