@@ -147,7 +147,16 @@
   display: block;
 }
 
-/* Mobile Controls - Handled in mobile.css */
+/* Mobile Controls */
+.mobile-controls {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .mobile-controls {
+    display: flex;
+  }
+}
 
 .mobile-toggle {
   display: none;
