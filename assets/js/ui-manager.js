@@ -298,40 +298,11 @@ function setupSearchInput() {
   }
 }
 
-// Auto-detect user location on load
+// Auto-detect user location on load (delegated to LocationManager)
 function autoDetectLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        
-        if (window.mapManager) {
-          window.mapManager.centerOnLocation(latitude, longitude, 12);
-          window.mapManager.showUserLocation(latitude, longitude, position.coords.accuracy);
-        }
-        
-        setTimeout(() => {
-          if (window.loadNearbyPlaces) {
-            loadNearbyPlaces();
-          }
-        }, 1000);
-      },
-      (error) => {
-        console.log('Location access denied, using default location');
-        if (window.mapManager) {
-          window.mapManager.centerOnLocation(51.505, -0.09, 10);
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000
-      }
-    );
-  } else {
-    if (window.mapManager) {
-      window.mapManager.centerOnLocation(51.505, -0.09, 10);
-    }
+  // This is now handled by LocationManager.autoDetectLocation()
+  if (window.locationManager) {
+    window.locationManager.autoDetectLocation();
   }
 }
 
@@ -339,9 +310,6 @@ function autoDetectLocation() {
 window.addEventListener('DOMContentLoaded', () => {
   // Setup search input
   setupSearchInput();
-  
-  // Auto-detect location
-  setTimeout(autoDetectLocation, 1000);
   
   // Auto-expand nearby places section
   setTimeout(() => {

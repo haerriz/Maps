@@ -2,7 +2,7 @@
 class LocationInitializer {
   static async initializeUserLocation() {
     try {
-      // Try to get user's real location
+      // Try to get user's real location via IP
       const userLocation = await Utils.getUserLocation();
       
       if (userLocation) {
@@ -21,21 +21,43 @@ class LocationInitializer {
       console.warn('Could not initialize user location:', error);
     }
     
-    // Fallback to London if location detection fails
-    CONFIG.DEFAULT_CENTER = [51.505, -0.09];
+    // Fallback to Chennai, India if location detection fails
+    CONFIG.DEFAULT_CENTER = [13.0827, 80.2707];
+    console.log('Using default location: Chennai, India');
     return null;
   }
   
   static async initializeWithBrowserLocation() {
-    try {
-      if (!navigator.geolocation) {
-        console.warn('Geolocation not supported, using IP location');
-        return await LocationInitializer.initializeUserLocation();
+    // Check if geolocation is available and not blocked
+    if (!navigator.geolocation) {
+      console.log('Geolocation not supported, using IP location');
+      return await LocationInitializer.initializeUserLocation();
+    }
+
+    // Check permissions first
+    if ('permissions' in navigator) {
+      try {
+        const permission = await navigator.permissions.query({name: 'geolocation'});
+        if (permission.state === 'denied') {
+          console.log('Geolocation permission denied, using IP location');
+          return await LocationInitializer.initializeUserLocation();
+        }
+      } catch (error) {
+        console.log('Permissions API not supported');
       }
-      
+    }
+    
+    try {
       return new Promise((resolve) => {
+        const timeoutId = setTimeout(async () => {
+          console.log('Geolocation timeout, using IP location');
+          const ipLocation = await LocationInitializer.initializeUserLocation();
+          resolve(ipLocation);
+        }, 3000);
+        
         navigator.geolocation.getCurrentPosition(
           (position) => {
+            clearTimeout(timeoutId);
             const location = {
               lat: position.coords.latitude,
               lng: position.coords.longitude,
@@ -52,20 +74,21 @@ class LocationInitializer {
             resolve(location);
           },
           async (error) => {
-            console.warn('Browser geolocation failed:', error.message);
+            clearTimeout(timeoutId);
+            console.log('Browser geolocation failed:', error.message);
             // Fallback to IP-based location
             const ipLocation = await LocationInitializer.initializeUserLocation();
             resolve(ipLocation);
           },
           {
             enableHighAccuracy: false,
-            timeout: 5000,
+            timeout: 2000,
             maximumAge: 600000 // 10 minutes
           }
         );
       });
     } catch (error) {
-      console.warn('Geolocation error, using IP location:', error);
+      console.log('Geolocation error, using IP location:', error);
       return await LocationInitializer.initializeUserLocation();
     }
   }
@@ -74,7 +97,12 @@ class LocationInitializer {
 // Auto-initialize when DOM is ready
 window.addEventListener('DOMContentLoaded', async () => {
   // Try browser geolocation first, then IP-based
-  await LocationInitializer.initializeWithBrowserLocation();
+  try {
+    await LocationInitializer.initializeWithBrowserLocation();
+  } catch (error) {
+    console.log('Location initialization failed, using default');
+    CONFIG.DEFAULT_CENTER = [13.0827, 80.2707]; // Chennai, India
+  }
 });
 
 // Export for use in other modules

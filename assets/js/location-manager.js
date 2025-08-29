@@ -2,11 +2,27 @@
 class LocationManager {
   constructor() {
     this.userLocation = null;
+    this.permissionStatus = null;
+    this.initPermissionStatus();
+  }
+
+  async initPermissionStatus() {
+    if ('permissions' in navigator) {
+      try {
+        this.permissionStatus = await navigator.permissions.query({name: 'geolocation'});
+        this.permissionStatus.addEventListener('change', () => {
+          console.log('Geolocation permission changed:', this.permissionStatus.state);
+        });
+      } catch (error) {
+        console.log('Permissions API not supported');
+      }
+    }
   }
 
   async useMyLocation() {
     if (!navigator.geolocation) {
       this.showLocationError('Geolocation is not supported by this browser.');
+      await this.fallbackToIPLocation();
       return;
     }
 
@@ -20,6 +36,7 @@ class LocationManager {
       };
       
       this.userLocation = latlng;
+      this.saveLocationPermission(true);
       
       if (window.mapManager) {
         window.mapManager.showUserLocation(latlng.lat, latlng.lng, position.coords.accuracy);
@@ -36,37 +53,41 @@ class LocationManager {
 
   requestLocationPermission() {
     return new Promise((resolve, reject) => {
+      const options = {
+        enableHighAccuracy: false,
+        timeout: 10000,
+        maximumAge: 600000
+      };
+      
       navigator.geolocation.getCurrentPosition(
         resolve,
         reject,
-        {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 300000
-        }
+        options
       );
     });
   }
 
-  handleGeolocationError(error) {
-    let message = 'Unable to get your location. ';
+  async handleGeolocationError(error) {
+    let message = 'Unable to get your precise location. ';
     
     switch (error.code) {
       case error.PERMISSION_DENIED:
-        message += 'Location access was denied. Please enable location permissions in your browser settings.';
+        message += 'Location access was denied. Using approximate location instead.';
+        this.saveLocationPermission(false);
         break;
       case error.POSITION_UNAVAILABLE:
-        message += 'Location information is unavailable. Please try again.';
+        message += 'Location information is unavailable. Using approximate location.';
         break;
       case error.TIMEOUT:
-        message += 'Location request timed out. Please try again.';
+        message += 'Location request timed out. Using approximate location.';
         break;
       default:
-        message += 'An unknown error occurred while retrieving location.';
+        message += 'Using approximate location based on your IP address.';
         break;
     }
     
-    this.showLocationError(message);
+    console.log(message);
+    await this.fallbackToIPLocation();
   }
 
   showLocationError(message) {
@@ -74,19 +95,21 @@ class LocationManager {
     if (window.chatManager) {
       window.chatManager.addMessage(message, 'ai');
     } else {
-      alert(message);
-    }
-    
-    // Fallback to default location (London)
-    if (window.mapManager) {
-      window.mapManager.centerOnLocation(51.505, -0.09, 10);
+      console.log(message);
     }
   }
 
   async autoDetectLocation() {
+    // Check if user previously denied permission
+    if (this.hasLocationPermissionDenied()) {
+      console.log('Location permission previously denied, using IP location');
+      await this.fallbackToIPLocation();
+      return;
+    }
+
     if (!navigator.geolocation) {
-      console.log('Geolocation not supported, using default location');
-      this.useDefaultLocation();
+      console.log('Geolocation not supported, using IP location');
+      await this.fallbackToIPLocation();
       return;
     }
 
@@ -100,6 +123,8 @@ class LocationManager {
         name: 'My Location'
       };
       
+      this.saveLocationPermission(true);
+      
       if (window.mapManager) {
         window.mapManager.centerOnLocation(latitude, longitude, 12);
         window.mapManager.showUserLocation(latitude, longitude, position.coords.accuracy);
@@ -111,23 +136,79 @@ class LocationManager {
         }
       }, 1000);
     } catch (error) {
-      console.log('Location access denied, using default location');
-      this.useDefaultLocation();
+      console.log('Location access denied, using IP location');
+      await this.fallbackToIPLocation();
     }
   }
 
-  useDefaultLocation() {
-    // Fallback to default location (London)
-    if (window.mapManager) {
-      window.mapManager.centerOnLocation(51.505, -0.09, 10);
+  async fallbackToIPLocation() {
+    try {
+      const ipLocation = await Utils.getUserLocation();
+      if (ipLocation) {
+        this.userLocation = {
+          lat: ipLocation.lat,
+          lng: ipLocation.lng,
+          name: `${ipLocation.city}, ${ipLocation.country}`
+        };
+        
+        if (window.mapManager) {
+          window.mapManager.centerOnLocation(ipLocation.lat, ipLocation.lng, 10);
+        }
+        
+        console.log(`Using IP-based location: ${ipLocation.city}, ${ipLocation.country}`);
+      } else {
+        this.useDefaultLocation();
+      }
+    } catch (error) {
+      console.log('IP location failed, using default location');
+      this.useDefaultLocation();
     }
     
-    // Load nearby places for default location
+    // Load nearby places
     setTimeout(() => {
       if (window.nearbyPlacesManager) {
         window.nearbyPlacesManager.loadNearbyPlaces();
       }
     }, 1000);
+  }
+
+  useDefaultLocation() {
+    // Fallback to Chennai, India (from config)
+    this.userLocation = {
+      lat: 13.0827,
+      lng: 80.2707,
+      name: 'Chennai, India'
+    };
+    
+    if (window.mapManager) {
+      window.mapManager.centerOnLocation(13.0827, 80.2707, 10);
+    }
+    
+    console.log('Using default location: Chennai, India');
+  }
+
+  saveLocationPermission(granted) {
+    try {
+      localStorage.setItem('locationPermission', granted ? 'granted' : 'denied');
+      localStorage.setItem('locationPermissionTime', Date.now().toString());
+    } catch (error) {
+      console.log('Could not save location permission status');
+    }
+  }
+
+  hasLocationPermissionDenied() {
+    try {
+      const permission = localStorage.getItem('locationPermission');
+      const time = localStorage.getItem('locationPermissionTime');
+      
+      if (permission === 'denied' && time) {
+        const daysSince = (Date.now() - parseInt(time)) / (1000 * 60 * 60 * 24);
+        return daysSince < 7; // Don't ask again for 7 days
+      }
+    } catch (error) {
+      console.log('Could not check location permission status');
+    }
+    return false;
   }
 
   quickAddLocation(locationName) {
@@ -165,12 +246,16 @@ function quickAddLocation(locationName) {
   }
 }
 
+
+
 // Initialize
 window.addEventListener('DOMContentLoaded', () => {
   window.locationManager = new LocationManager();
   
-  // Auto-detect location on load
+  // Auto-detect location on load (only if not already initialized)
   setTimeout(() => {
-    window.locationManager.autoDetectLocation();
-  }, 1000);
+    if (!window.locationManager.userLocation) {
+      window.locationManager.autoDetectLocation();
+    }
+  }, 2000);
 });

@@ -5,7 +5,21 @@
 }
 
 .map-3d-enhanced {
-  /* Minimal 3D enhancement */
+  /* Ensure proper containment during 3D transforms */
+  height: 100vh !important;
+  width: 100% !important;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* Container fixes for 3D mode */
+.container {
+  overflow: hidden;
+}
+
+#map {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
 }
 
 /* Simplified building effects */
@@ -165,13 +179,34 @@
 /* Performance Optimizations */
 .map-3d-enhanced .leaflet-tile-container {
   transform: translateZ(0);
-  backface-visibility: hidden;
+  backface-visibility: visible !important;
+}
+
+.map-3d-enhanced .leaflet-tile-pane {
+  transform: translateZ(1px);
+  backface-visibility: visible !important;
 }
 
 .map-3d-enhanced .leaflet-marker-pane {
-  transform: translateZ(0);
+  transform: translateZ(2px);
 }
 
 .map-3d-enhanced .leaflet-overlay-pane {
+  transform: translateZ(1px);
+}
+
+/* Ensure tiles remain visible during 3D transforms */
+.map-3d-enhanced .leaflet-tile {
+  backface-visibility: visible !important;
   transform: translateZ(0);
+}
+
+/* Prevent white space during transforms */
+.map-3d-enhanced .leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.map-3d-enhanced .leaflet-map-pane {
+  /* Allow proper tile loading */
 }
