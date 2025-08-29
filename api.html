@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Documentation - Haerriz Maps</title>
+  <meta name="description" content="Haerriz Maps API documentation. Learn how to integrate our AI-powered route optimization and trip planning features into your applications.">
+  <link rel="canonical" href="https://maps.haerriz.com/api">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="/" class="logo">🗺️ Haerriz Maps</a>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/help">Help</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-content">
+    <section class="hero-section">
+      <h1>API Documentation</h1>
+      <p class="hero-subtitle">Integrate Haerriz Maps into your applications</p>
+    </section>
+
+    <section class="api-content">
+      <h2>Overview</h2>
+      <p>Haerriz Maps provides a JavaScript SDK for integrating AI-powered route optimization and trip planning into your web applications. Our API is built on open-source technologies and free services.</p>
+
+      <h2>Getting Started</h2>
+      <div class="code-block">
+        <h3>Include the SDK</h3>
+        <pre><code>&lt;script src="https://maps.haerriz.com/sdk/haerriz-maps.js"&gt;&lt;/script&gt;</code></pre>
+      </div>
+
+      <div class="code-block">
+        <h3>Initialize the Map</h3>
+        <pre><code>const map = new HaerrizMaps({
+  container: 'map-container',
+  center: [12.9716, 77.5946], // Bangalore
+  zoom: 13
+});</code></pre>
+      </div>
+
+      <h2>Core Features</h2>
+      
+      <div class="api-section">
+        <h3>Route Optimization</h3>
+        <pre><code>// Calculate optimized route
+const route = await map.calculateRoute({
+  stops: [
+    { lat: 12.9716, lng: 77.5946, name: 'Start' },
+    { lat: 12.9352, lng: 77.6245, name: 'Destination' }
+  ],
+  mode: 'driving', // driving, walking, cycling, transit
+  optimize: true
+});
+
+console.log(route.distance, route.duration);</code></pre>
+      </div>
+
+      <div class="api-section">
+        <h3>Nearby Places</h3>
+        <pre><code>// Find nearby places
+const places = await map.findNearbyPlaces({
+  lat: 12.9716,
+  lng: 77.5946,
+  radius: 1000, // meters
+  types: ['restaurant', 'hotel', 'fuel']
+});
+
+places.forEach(place => {
+  console.log(place.name, place.type);
+});</code></pre>
+      </div>
+
+      <div class="api-section">
+        <h3>Weather Integration</h3>
+        <pre><code>// Get weather for location
+const weather = await map.getWeather({
+  lat: 12.9716,
+  lng: 77.5946
+});
+
+console.log(weather.temperature, weather.condition);</code></pre>
+      </div>
+
+      <div class="api-section">
+        <h3>Traffic Analysis</h3>
+        <pre><code>// Analyze traffic for route
+const traffic = await map.analyzeTraffic({
+  coordinates: routeCoordinates,
+  time: new Date()
+});
+
+console.log(traffic.delay, traffic.avgSpeed);</code></pre>
+      </div>
+
+      <h2>Events</h2>
+      <div class="api-section">
+        <pre><code>// Listen to map events
+map.on('route-calculated', (event) => {
+  console.log('Route ready:', event.route);
+});
+
+map.on('location-selected', (event) => {
+  console.log('Location:', event.coordinates);
+});</code></pre>
+      </div>
+
+      <h2>Configuration Options</h2>
+      <table class="api-table">
+        <thead>
+          <tr>
+            <th>Option</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>container</td>
+            <td>string</td>
+            <td>required</td>
+            <td>DOM element ID for map container</td>
+          </tr>
+          <tr>
+            <td>center</td>
+            <td>array</td>
+            <td>[0, 0]</td>
+            <td>Initial map center [lat, lng]</td>
+          </tr>
+          <tr>
+            <td>zoom</td>
+            <td>number</td>
+            <td>13</td>
+            <td>Initial zoom level</td>
+          </tr>
+          <tr>
+            <td>theme</td>
+            <td>string</td>
+            <td>'light'</td>
+            <td>Map theme: 'light', 'dark'</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Rate Limits</h2>
+      <ul>
+        <li><strong>Route Calculation:</strong> 100 requests per minute</li>
+        <li><strong>Geocoding:</strong> 60 requests per minute</li>
+        <li><strong>Weather API:</strong> 50 requests per minute</li>
+        <li><strong>Traffic Analysis:</strong> 30 requests per minute</li>
+      </ul>
+
+      <h2>Error Handling</h2>
+      <div class="code-block">
+        <pre><code>try {
+  const route = await map.calculateRoute(options);
+} catch (error) {
+  if (error.code === 'RATE_LIMIT_EXCEEDED') {
+    console.log('Please wait before making more requests');
+  } else if (error.code === 'INVALID_COORDINATES') {
+    console.log('Check your coordinate format');
+  }
+}</code></pre>
+      </div>
+
+      <h2>Support</h2>
+      <p>Need help with the API?</p>
+      <ul>
+        <li>📧 Email: api@haerriz.com</li>
+        <li>📚 Examples: <a href="https://github.com/haerriz/Maps/tree/main/examples">GitHub Repository</a></li>
+        <li>💬 Community: <a href="https://github.com/haerriz/Maps/discussions">GitHub Discussions</a></li>
+      </ul>
+
+      <h2>Haerriz Ecosystem</h2>
+      <p>Explore more from Haerriz Technologies:</p>
+      <div class="ecosystem-grid">
+        <div class="ecosystem-item">
+          <h4><a href="https://haerriz.com" target="_blank" rel="noopener">Haerriz.com</a></h4>
+          <p>Main website with comprehensive tech services and solutions</p>
+        </div>
+        <div class="ecosystem-item">
+          <h4><a href="https://haerriz.blogspot.com" target="_blank" rel="noopener">Haerriz Blog</a></h4>
+          <p>Technical insights, tutorials, and industry analysis</p>
+        </div>
+        <div class="ecosystem-item">
+          <h4><a href="https://haerriztrendz.in" target="_blank" rel="noopener">Haerriz Trendz</a></h4>
+          <p>Fashion and lifestyle e-commerce platform</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Haerriz Technologies. Made with ❤️ for developers worldwide.</p>
+  </footer>
+</body>
+</html>
