@@ -32,9 +32,14 @@ class LocationManager {
   }
 
   requestLocationPermission() {
-    // Just try geolocation directly - no permission checks
+    // Check if geolocation is blocked by permissions policy
     if (!navigator.geolocation) {
       throw new Error('Geolocation not supported');
+    }
+
+    // Check if we're in an iframe without proper permissions
+    if (window.self !== window.top) {
+      throw new Error('Geolocation blocked in iframe - please open in main window');
     }
 
     return new Promise((resolve, reject) => {
