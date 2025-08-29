@@ -3,20 +3,6 @@ class LocationManager {
   constructor() {
     this.userLocation = null;
     this.permissionStatus = null;
-    this.initPermissionStatus();
-  }
-
-  async initPermissionStatus() {
-    if ('permissions' in navigator) {
-      try {
-        this.permissionStatus = await navigator.permissions.query({name: 'geolocation'});
-        this.permissionStatus.addEventListener('change', () => {
-          console.log('Geolocation permission changed:', this.permissionStatus.state);
-        });
-      } catch (error) {
-        console.log('Permissions API not supported');
-      }
-    }
   }
 
   async useMyLocation() {
