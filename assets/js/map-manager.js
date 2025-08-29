@@ -54,6 +54,11 @@ class MapManager {
       window.tourManager.addStop(latlng);
     }
     
+    // Trigger location enhancement
+    document.dispatchEvent(new CustomEvent('locationAdded', {
+      detail: { lat: latlng.lat, lng: latlng.lng, name: latlng.name || title }
+    }));
+    
     return marker;
   }
 

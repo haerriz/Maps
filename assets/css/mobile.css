@@ -356,9 +356,12 @@
 
   /* Mobile search suggestions */
   .search-suggestions {
-    max-height: 200px;
+    max-height: 300px;
     border-radius: 8px;
     margin-top: 4px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px var(--shadow-color);
   }
 
   .suggestion-item {
@@ -366,11 +369,19 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+    min-height: 60px;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .suggestion-item:hover {
+    background: var(--bg-secondary);
   }
 
   .suggestion-text {
     font-size: 14px;
     width: 100%;
+    color: var(--text-primary);
+    line-height: 1.4;
   }
 
   .suggestion-actions {
