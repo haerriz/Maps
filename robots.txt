@@ -1,4 +1,13 @@
 User-agent: *
 Allow: /
+Disallow: /assets/js/
+Disallow: /config/
 
 Sitemap: https://maps.haerriz.com/sitemap.xml
+
+# SEO optimization
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
