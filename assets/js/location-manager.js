@@ -31,22 +31,10 @@ class LocationManager {
     }
   }
 
-  async requestLocationPermission() {
-    // Check if geolocation is available and not blocked
+  requestLocationPermission() {
+    // Just try geolocation directly - no permission checks
     if (!navigator.geolocation) {
       throw new Error('Geolocation not supported');
-    }
-
-    // Check permissions first if API is available
-    if ('permissions' in navigator) {
-      try {
-        const permission = await navigator.permissions.query({name: 'geolocation'});
-        if (permission.state === 'denied') {
-          throw new Error('Geolocation permission denied');
-        }
-      } catch (error) {
-        // Permissions API not supported, continue with geolocation
-      }
     }
 
     return new Promise((resolve, reject) => {
