@@ -54,9 +54,9 @@ class Map3DManager {
     const mapContainer = document.getElementById('map');
     if (!mapContainer) return;
 
-    // Apply very subtle 3D transforms to avoid hiding tiles
-    mapContainer.style.transform = `perspective(2000px) rotateX(2deg)`;
-    mapContainer.style.transformOrigin = 'center bottom';
+    // Apply very subtle 3D transforms with dynamic scaling
+    mapContainer.style.transform = `perspective(2000px) rotateX(2deg) scale(1.2)`;
+    mapContainer.style.transformOrigin = 'center center';
     mapContainer.style.transition = 'transform 0.5s ease';
     mapContainer.style.height = '100vh';
     mapContainer.style.width = '100%';
@@ -234,10 +234,13 @@ class Map3DManager {
     const actualChange = Math.max(-maxChange, Math.min(maxChange, bearingDiff));
     this.bearing = ((currentBearing + actualChange) % 360 + 360) % 360;
     
-    // Apply rotation to map container with proper containment
+    // Apply rotation with dynamic scaling to prevent white space
     const mapContainer = document.getElementById('map');
     if (mapContainer) {
-      mapContainer.style.transform = `perspective(2000px) rotateX(${Math.min(this.tiltAngle, 3)}deg) rotateZ(${-this.bearing}deg)`;
+      const rotationAngle = Math.abs(this.bearing % 90 - 45);
+      const scale = 1 + (rotationAngle / 45) * 0.4; // Scale up to 1.4x at 45° rotation
+      
+      mapContainer.style.transform = `perspective(2000px) rotateX(${Math.min(this.tiltAngle, 3)}deg) rotateZ(${-this.bearing}deg) scale(${scale})`;
       mapContainer.style.transition = 'transform 0.5s ease-out';
     }
     
@@ -251,7 +254,10 @@ class Map3DManager {
     
     const mapContainer = document.getElementById('map');
     if (mapContainer) {
-      mapContainer.style.transform = `perspective(2000px) rotateX(${Math.min(this.tiltAngle, 3)}deg) rotateZ(${this.bearing}deg)`;
+      const rotationAngle = Math.abs(this.bearing % 90 - 45);
+      const scale = 1 + (rotationAngle / 45) * 0.4;
+      
+      mapContainer.style.transform = `perspective(2000px) rotateX(${Math.min(this.tiltAngle, 3)}deg) rotateZ(${this.bearing}deg) scale(${scale})`;
     }
   }
 
