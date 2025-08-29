@@ -31,21 +31,16 @@ class Utils {
     }
   }
   
-  // Get user location using free IP geolocation
+  // Get user location - returns default location (no IP APIs due to CORS)
   static async getUserLocation() {
-    try {
-      const response = await fetch('https://ipapi.co/json/');
-      const data = await response.json();
-      return {
-        lat: parseFloat(data.latitude),
-        lng: parseFloat(data.longitude),
-        city: data.city,
-        country: data.country_name
-      };
-    } catch (error) {
-      console.warn('Location API unavailable');
-      return null;
-    }
+    // Return default Chennai location since IP APIs have CORS issues
+    console.log('Using default location: Chennai, India');
+    return {
+      lat: 13.0827,
+      lng: 80.2707,
+      city: 'Chennai',
+      country: 'India'
+    };
   }
   
   // Geocoding using free Nominatim API

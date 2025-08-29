@@ -1,0 +1,174 @@
+/* Enhanced Features Styling */
+
+.location-enhancements {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  border-left: 3px solid var(--accent-color);
+}
+
+.enhancement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.enhancement-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.enhancement-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.enhancement-icon {
+  font-size: 20px;
+  width: 24px;
+  text-align: center;
+}
+
+.enhancement-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.enhancement-info strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.enhancement-info small {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+/* Timezone Info */
+.timezone-info {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0;
+}
+
+.timezone-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.timezone-item:last-child {
+  border-bottom: none;
+}
+
+.timezone-item strong {
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.timezone-item span {
+  color: var(--accent-color);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Wikipedia Info */
+.wikipedia-info {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0;
+}
+
+.wikipedia-info h4 {
+  color: var(--text-primary);
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.wikipedia-info p {
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 11px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 767px) {
+  .enhancement-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  
+  .enhancement-card {
+    padding: 6px;
+    gap: 6px;
+  }
+  
+  .enhancement-icon {
+    font-size: 16px;
+    width: 20px;
+  }
+  
+  .enhancement-info strong {
+    font-size: 11px;
+  }
+  
+  .enhancement-info small {
+    font-size: 9px;
+  }
+}
+
+/* Air quality indicators */
+.enhancement-card.air-quality.good {
+  border-left: 3px solid #4CAF50;
+}
+
+.enhancement-card.air-quality.moderate {
+  border-left: 3px solid #FFC107;
+}
+
+.enhancement-card.air-quality.poor {
+  border-left: 3px solid #FF9800;
+}
+
+.enhancement-card.air-quality.unhealthy {
+  border-left: 3px solid #F44336;
+}
+
+/* Elevation profile */
+.elevation-profile {
+  height: 60px;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+  margin: 8px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.elevation-chart {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to top, var(--accent-color) 0%, transparent 100%);
+  opacity: 0.3;
+}

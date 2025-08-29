@@ -20,35 +20,63 @@ class NearbyPlacesManager {
       return;
     }
     
-    nearbyContainer.innerHTML = '<p class="loading-text">🔍 Finding nearby places...</p>';
-    if (statusElement) statusElement.textContent = 'Loading nearby places...';
+    // Show location being used
+    const locationSource = this.getLocationSource();
+    nearbyContainer.innerHTML = `<p class="loading-text">🔍 Finding places near ${locationSource}...</p>`;
+    if (statusElement) statusElement.textContent = `Searching near ${locationSource}...`;
     
     try {
       const places = await this.fetchNearbyPlaces(center.lat, center.lng);
       this.displayNearbyPlaces(places);
-      if (statusElement) statusElement.textContent = `Found ${places.length} nearby places`;
+      if (statusElement) statusElement.textContent = `Found ${places.length} places near ${locationSource}`;
     } catch (error) {
       const fallbackPlaces = this.generateFallbackPlaces(center.lat, center.lng);
       this.displayNearbyPlaces(fallbackPlaces);
-      if (statusElement) statusElement.textContent = 'Showing nearby place types';
+      if (statusElement) statusElement.textContent = `Showing place types near ${locationSource}`;
     }
   }
 
+  getLocationSource() {
+    if (window.locationManager && window.locationManager.userLocation) {
+      return 'your location';
+    }
+    if (window.tourManager && window.tourManager.stops.length > 0) {
+      return 'selected marker';
+    }
+    return 'map center';
+  }
+
   generateFallbackPlaces(lat, lng) {
+    // Use real place types but indicate they're suggestions
     return [
-      { lat: lat + 0.001, lon: lng + 0.001, tags: { name: 'Restaurant nearby', amenity: 'restaurant' } },
-      { lat: lat - 0.001, lon: lng + 0.002, tags: { name: 'Cafe nearby', amenity: 'cafe' } },
-      { lat: lat + 0.002, lon: lng - 0.001, tags: { name: 'Hospital nearby', amenity: 'hospital' } },
-      { lat: lat - 0.002, lon: lng - 0.002, tags: { name: 'Bank nearby', amenity: 'bank' } },
-      { lat: lat + 0.003, lon: lng, tags: { name: 'Fuel station nearby', amenity: 'fuel' } }
+      { lat: lat + 0.001, lon: lng + 0.001, tags: { name: 'Find Restaurants', amenity: 'restaurant' } },
+      { lat: lat - 0.001, lon: lng + 0.002, tags: { name: 'Find Cafes', amenity: 'cafe' } },
+      { lat: lat + 0.002, lon: lng - 0.001, tags: { name: 'Find Hospitals', amenity: 'hospital' } },
+      { lat: lat - 0.002, lon: lng - 0.002, tags: { name: 'Find Banks', amenity: 'bank' } }
     ];
   }
 
   getCurrentMapCenter() {
+    // Priority: User location > Last marker > Map center
+    if (window.locationManager && window.locationManager.userLocation) {
+      return {
+        lat: window.locationManager.userLocation.lat,
+        lng: window.locationManager.userLocation.lng
+      };
+    }
+    
+    // Use last added marker if available
+    if (window.tourManager && window.tourManager.stops.length > 0) {
+      const lastStop = window.tourManager.stops[window.tourManager.stops.length - 1];
+      return { lat: lastStop.lat, lng: lastStop.lng };
+    }
+    
+    // Fallback to map center
     if (window.mapManager && window.mapManager.map) {
       const center = window.mapManager.map.getCenter();
       return { lat: center.lat, lng: center.lng };
     }
+    
     return null;
   }
 
@@ -80,33 +108,38 @@ class NearbyPlacesManager {
   }
 
   async fetchNominatimNearby(lat, lng) {
-    try {
-      // Search for nearby places using bounding box around current location
-      const radius = 0.01; // ~1km radius
-      const bbox = `${lng - radius},${lat - radius},${lng + radius},${lat + radius}`;
-      
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=restaurant+cafe+hospital+bank+fuel+pharmacy+hotel&viewbox=${bbox}&bounded=1&limit=20`
-      );
-      
-      if (!response.ok) throw new Error('Nominatim failed');
-      
-      const data = await response.json();
-      const places = data.map(place => ({
-        lat: parseFloat(place.lat),
-        lon: parseFloat(place.lon),
-        tags: {
-          name: place.display_name.split(',')[0],
-          amenity: place.class || place.type || 'place',
-          'addr:street': place.display_name
+    const amenities = ['restaurant', 'cafe', 'hospital', 'bank', 'fuel', 'pharmacy', 'hotel', 'supermarket'];
+    const allPlaces = [];
+    
+    for (const amenity of amenities.slice(0, 4)) { // Limit to 4 types to avoid rate limits
+      try {
+        const radius = 0.005; // ~500m radius
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&amenity=${amenity}&lat=${lat}&lon=${lng}&radius=1000&limit=3&addressdetails=1`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          const places = data.map(place => ({
+            lat: parseFloat(place.lat),
+            lon: parseFloat(place.lon),
+            tags: {
+              name: place.name || place.display_name.split(',')[0],
+              amenity: amenity,
+              'addr:street': place.address?.road || place.display_name.split(',')[1]?.trim()
+            }
+          }));
+          allPlaces.push(...places);
         }
-      }));
-      
-      return places.slice(0, 10);
-    } catch (error) {
-      console.error('Nominatim nearby search failed:', error);
-      return [];
+        
+        // Small delay to respect rate limits
+        await new Promise(resolve => setTimeout(resolve, 200));
+      } catch (error) {
+        console.warn(`Failed to fetch ${amenity}:`, error);
+      }
     }
+    
+    return allPlaces.slice(0, 8);
   }
 
   displayNearbyPlaces(places) {

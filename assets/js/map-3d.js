@@ -25,6 +25,11 @@ class Map3DManager {
     // Add 3D route visualization
     this.enhance3DRoute();
     
+    // Check if tiles are still loading after 3D transform
+    setTimeout(() => {
+      this.checkTileVisibility();
+    }, 2000);
+    
     console.log('3D navigation mode enabled');
   }
 
@@ -49,10 +54,12 @@ class Map3DManager {
     const mapContainer = document.getElementById('map');
     if (!mapContainer) return;
 
-    // Apply subtle 3D transforms directly to map
-    mapContainer.style.transform = `perspective(2000px) rotateX(15deg)`;
-    mapContainer.style.transformOrigin = 'center bottom';
+    // Apply very subtle 3D transforms with dynamic scaling
+    mapContainer.style.transform = `perspective(2000px) rotateX(2deg) scale(1.2)`;
+    mapContainer.style.transformOrigin = 'center center';
     mapContainer.style.transition = 'transform 0.5s ease';
+    mapContainer.style.height = '100vh';
+    mapContainer.style.width = '100%';
     mapContainer.classList.add('map-3d-enhanced');
   }
 
@@ -227,10 +234,13 @@ class Map3DManager {
     const actualChange = Math.max(-maxChange, Math.min(maxChange, bearingDiff));
     this.bearing = ((currentBearing + actualChange) % 360 + 360) % 360;
     
-    // Apply rotation to map container
+    // Apply rotation with dynamic scaling to prevent white space
     const mapContainer = document.getElementById('map');
     if (mapContainer) {
-      mapContainer.style.transform = `perspective(2000px) rotateX(${this.tiltAngle}deg) rotateZ(${-this.bearing}deg)`;
+      const rotationAngle = Math.abs(this.bearing % 90 - 45);
+      const scale = 1 + (rotationAngle / 45) * 0.4; // Scale up to 1.4x at 45° rotation
+      
+      mapContainer.style.transform = `perspective(2000px) rotateX(${Math.min(this.tiltAngle, 3)}deg) rotateZ(${-this.bearing}deg) scale(${scale})`;
       mapContainer.style.transition = 'transform 0.5s ease-out';
     }
     
@@ -244,7 +254,10 @@ class Map3DManager {
     
     const mapContainer = document.getElementById('map');
     if (mapContainer) {
-      mapContainer.style.transform = `perspective(1000px) rotateX(${this.tiltAngle}deg) rotateZ(${this.bearing}deg)`;
+      const rotationAngle = Math.abs(this.bearing % 90 - 45);
+      const scale = 1 + (rotationAngle / 45) * 0.4;
+      
+      mapContainer.style.transform = `perspective(2000px) rotateX(${Math.min(this.tiltAngle, 3)}deg) rotateZ(${this.bearing}deg) scale(${scale})`;
     }
   }
 
@@ -295,6 +308,19 @@ class Map3DManager {
     `;
     
     document.head.appendChild(terrainStyle);
+  }
+
+  checkTileVisibility() {
+    const tiles = document.querySelectorAll('.leaflet-tile');
+    const visibleTiles = Array.from(tiles).filter(tile => {
+      const rect = tile.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    });
+    
+    if (visibleTiles.length === 0) {
+      console.warn('No tiles visible in 3D mode, disabling 3D effects');
+      this.disable3DMode();
+    }
   }
 }
 

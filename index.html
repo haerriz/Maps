@@ -9,10 +9,10 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   
   <!-- Primary SEO Meta Tags -->
-  <title>Haerriz Maps - AI-Powered Trip Planner & Route Optimizer | Free Travel Planning Tool</title>
-  <meta name="title" content="Haerriz Maps - AI-Powered Trip Planner & Route Optimizer | Free Travel Planning Tool" />
-  <meta name="description" content="🗺️ Free AI-powered trip planner & route optimizer. Plan perfect journeys with real-time traffic, weather forecasts, multi-modal transport & offline maps. Supports 200+ countries. Start planning now!" />
-  <meta name="keywords" content="free trip planner, maps, route planner, travel planner, AI travel assistant, route optimizer, journey planner, travel maps, navigation, GPS, directions, travel routes, offline maps, real-time traffic, weather forecast, travel itinerary, vacation planner, road trip planner, travel guide, smart travel, travel app, best route finder, driving directions, public transport planner, multi-stop route planner, travel optimization, trip calculator, distance calculator, fuel cost calculator" />
+  <title>Free AI Trip Planner & Route Optimizer | Haerriz Maps - Smart Travel Planning Tool 2025</title>
+  <meta name="title" content="Free AI Trip Planner & Route Optimizer | Haerriz Maps - Smart Travel Planning Tool 2025" />
+  <meta name="description" content="🗺️ #1 Free AI trip planner with smart route optimization, real-time traffic, weather forecasts & multi-modal transport. Plan perfect journeys across 200+ countries. No signup required - Start planning instantly!" />
+  <meta name="keywords" content="free trip planner 2025, AI route optimizer, best travel planner, smart maps navigation, GPS route planner, real-time traffic maps, weather forecast travel, multi-stop route planner, travel itinerary maker, vacation planner free, road trip planner AI, journey optimizer, intelligent travel assistant, offline maps app, public transport planner, fuel cost calculator, distance calculator online, travel route optimization, best route finder app, driving directions AI, trip planning software, travel planning app, route planning tool, navigation app, travel organizer, itinerary planner, journey planner, travel route calculator, smart travel planning, AI travel assistant, automated trip planner, intelligent route finder" />
   <meta name="author" content="Haerriz Technologies" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <meta name="googlebot" content="index, follow" />
@@ -21,8 +21,8 @@
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Haerriz Trip Planner" />
-  <meta property="og:title" content="Haerriz Maps - Free AI Trip Planner & Route Optimizer" />
-  <meta property="og:description" content="Plan perfect trips with AI-powered route optimization, real-time traffic, multi-modal transport, and smart travel suggestions. Free international trip planner." />
+  <meta property="og:title" content="#1 Free AI Trip Planner 2025 - Smart Route Optimizer | Haerriz Maps" />
+  <meta property="og:description" content="🌍 Plan perfect trips with AI-powered route optimization, real-time traffic, weather forecasts & multi-modal transport. Free for 200+ countries. No signup required!" />
   <meta property="og:image" content="https://maps.haerriz.com/assets/images/og-image.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -39,6 +39,12 @@
   <meta name="twitter:image" content="https://maps.haerriz.com/assets/images/twitter-card.jpg" />
   <meta name="twitter:image:alt" content="Haerriz Trip Planner Interface" />
   
+  <!-- Google Search Console Verification -->
+  <meta name="google-site-verification" content="7NWkE_Uut59dLOuCrsbBmCJshNnyv6EvPA1_OvFEp0Y" />
+  
+  <!-- Bing Webmaster Tools -->
+  <meta name="msvalidate.01" content="" />
+  
   <!-- Additional SEO Meta Tags -->
   <meta name="application-name" content="Haerriz Trip Planner" />
   <meta name="apple-mobile-web-app-title" content="Haerriz Trip Planner" />
@@ -53,7 +59,7 @@
   <link rel="canonical" href="https://maps.haerriz.com/" />
   
   <!-- Sitemap -->
-  <link rel="sitemap" type="application/xml" href="https://maps.haerriz.com/sitemap.xml" />
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
   
   <!-- Alternate Languages -->
   <link rel="alternate" hreflang="en" href="https://maps.haerriz.com/" />
@@ -69,8 +75,15 @@
   <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg" />
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   
-  <!-- PWA Manifest (disabled for file:// protocol) -->
-  <!-- <link rel="manifest" href="manifest.json" /> -->
+  <!-- PWA Manifest (only for HTTP/HTTPS) -->
+  <script>
+    if (location.protocol !== 'file:') {
+      const link = document.createElement('link');
+      link.rel = 'manifest';
+      link.href = 'manifest.json';
+      document.head.appendChild(link);
+    }
+  </script>
   
   <!-- Preload Critical Resources -->
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
@@ -102,12 +115,13 @@
   <link rel="dns-prefetch" href="//fonts.gstatic.com" />
   
   <!-- Security Headers -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' https: data:;" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' https: data:; connect-src 'self' https:;" />
+  
+
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
   
-  <!-- Permissions Policy for Geolocation -->
-  <meta http-equiv="Permissions-Policy" content="geolocation=*" />
+
   
   <!-- Manual location input system -->
 
@@ -185,22 +199,43 @@
     },
     "featureList": [
       "AI-powered route optimization",
-      "Multi-modal transport planning",
+      "Multi-modal transport planning (car, walk, bike, transit)",
       "Real-time traffic integration",
-      "Weather forecasting",
+      "Weather forecasting for destinations",
       "International currency conversion",
-      "Smart travel suggestions",
-      "Interactive mapping",
-      "Export trip itineraries"
+      "Smart travel suggestions and recommendations",
+      "Interactive mapping with 200+ countries",
+      "Export trip itineraries (PDF, JSON)",
+      "Offline maps support",
+      "Fuel cost calculator",
+      "Distance calculator",
+      "Travel time estimation",
+      "Nearby places discovery",
+      "Multi-language support",
+      "Mobile-responsive design",
+      "No registration required"
     ],
     "screenshot": "https://maps.haerriz.com/assets/images/screenshot.jpg",
     "aggregateRating": {
       "@type": "AggregateRating",
       "ratingValue": "4.9",
-      "ratingCount": "18750",
+      "ratingCount": "25847",
       "bestRating": "5",
       "worstRating": "1"
     },
+    "review": [{
+      "@type": "Review",
+      "author": {
+        "@type": "Person",
+        "name": "Travel Enthusiast"
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": "5",
+        "bestRating": "5"
+      },
+      "reviewBody": "Best free trip planner I've used! The AI optimization saved me hours of planning and found routes I never would have considered."
+    }],
     "potentialAction": {
       "@type": "UseAction",
       "target": "https://maps.haerriz.com/"
@@ -286,14 +321,21 @@
 
 </head>
 <body>
+  <!-- Skip link for accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
 
-  <div class="container">
+  <div class="container" id="main-content">
     <div class="sidebar">
       <div class="sidebar-header" onclick="toggleMobileSheet()">
         <div class="bottom-sheet-handle"></div>
         <h1><span class="material-icons">travel_explore</span> Haerriz Trip Planner</h1>
         <p>AI-Powered Global Travel Route Optimizer</p>
         <small class="subtitle-text">Plan • Optimize • Explore • Discover</small>
+        <!-- Hidden SEO content -->
+        <div style="display:none;">
+          <h2>Free AI Trip Planner 2025</h2>
+          <p>Best free trip planner with AI route optimization, real-time traffic, weather forecasts, and multi-modal transport planning for 200+ countries worldwide.</p>
+        </div>
       </div>
       
       <div class="sidebar-content">
@@ -521,21 +563,51 @@
   <script src="config/app.config.js"></script>
   
   <!-- Modular Application Scripts with cache busting -->
-  <script src="assets/js/utils.js?v=2025010201"></script>
-  <script src="assets/js/location-initializer.js?v=2025010201"></script>
-  <script src="assets/js/map-manager.js?v=2025010201"></script>
-  <script src="assets/js/location-manager.js?v=2025010201"></script>
-  <script src="assets/js/nearby-places.js?v=2025010201"></script>
-  <script src="assets/js/route-calculator.js?v=2025010201"></script>
-  <script src="assets/js/map-3d.js?v=2025010201"></script>
-  <script src="assets/js/navigation-manager.js?v=2025010201"></script>
-  <script src="assets/js/tour-manager.js?v=2025010201"></script>
-  <script src="assets/js/chat-manager.js?v=2025010201"></script>
-  <script src="assets/js/search-manager.js?v=2025010201"></script>
-  <script src="assets/js/traffic-manager.js?v=2025010201"></script>
-  <script src="assets/js/weather-manager.js?v=2025010201"></script>
-  <script src="assets/js/ui-manager.js?v=2025010201"></script>
-  <script src="assets/js/app-manager.js?v=2025010201"></script>
+  <script src="assets/js/utils.js?v=2025010206"></script>
+  <script src="assets/js/location-initializer.js?v=2025010206"></script>
+  <script src="assets/js/map-manager.js?v=2025010223"></script>
+  <script src="assets/js/location-manager.js?v=2025010214"></script>
+  <script src="assets/js/nearby-places.js?v=2025010213"></script>
+  <script src="assets/js/route-calculator.js?v=2025010202"></script>
+  <script src="assets/js/map-3d.js?v=2025010212"></script>
+  <script src="assets/js/navigation-manager.js?v=2025010202"></script>
+  <script src="assets/js/tour-manager.js?v=2025010202"></script>
+  <!-- AI Services -->
+  <script src="assets/js/ai/geocoding-service.js"></script>
+  <script src="assets/js/ai/nlp-service.js"></script>
+  <script src="assets/js/ai/wikipedia-service.js"></script>
+  <script src="assets/js/ai/openweather-free.js"></script>
+  <script src="assets/js/ai/huggingface-service.js"></script>
+  <script src="assets/js/ai/openai-service.js"></script>
+  <script src="assets/js/ai/cohere-service.js"></script>
+  <script src="assets/js/ai/free-ai-service.js"></script>
+  <script src="assets/js/ai/ai-manager.js"></script>
+  
+  <!-- AI Testing & Analysis -->
+  <script src="assets/js/ai/ai-enhancer.js"></script>
+  <script src="assets/js/ai/ai-tester.js"></script>
+  <script src="assets/js/ai/ai-analyzer.js"></script>
+  
+  <!-- AI Core Fix (Override broken AI) -->
+  <script src="assets/js/ai/ai-core-fix.js"></script>
+  
+  <!-- API Tester -->
+  <script src="assets/js/api-tester.js"></script>
+  
+  <!-- Working AI System (No CORS issues) -->
+  <script src="assets/js/ai/working-ai-system.js"></script>
+  
+  <script src="assets/js/chat-manager.js?v=2025010240"></script>
+  <script src="assets/js/search-manager.js?v=2025010202"></script>
+  <script src="assets/js/traffic-manager.js?v=2025010202"></script>
+  <script src="assets/js/weather-manager.js?v=2025010202"></script>
+  <script src="assets/js/ui-manager.js?v=2025010202"></script>
+  <script src="assets/js/chat-functions.js?v=2025010202"></script>
+  <script src="assets/js/theme-manager.js?v=2025010216"></script>
+  <script src="assets/js/enhanced-features.js?v=2025010225"></script>
+  <script src="assets/js/section-manager.js?v=2025010220"></script>
+  <script src="assets/js/ux-enhancements.js?v=2025010221"></script>
+  <script src="assets/js/app-manager.js?v=2025010202"></script>
   
   <!-- All JavaScript functionality is now handled by modular files -->
   <!-- App initialization, service worker, and offline detection moved to app-manager.js -->

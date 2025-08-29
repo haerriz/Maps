@@ -1,0 +1,121 @@
+/* Section Card Mobile Enhancements */
+
+@media (max-width: 767px) {
+  .section-card {
+    margin-bottom: 12px;
+    border-radius: 12px;
+  }
+  
+  .section-header {
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .section-header span:first-child {
+    font-size: 20px;
+  }
+  
+  .section-header span:nth-child(2) {
+    font-size: 14px;
+  }
+  
+  .expand-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .section-content {
+    padding: 16px;
+  }
+  
+  /* Touch-friendly interactions */
+  .section-header {
+    min-height: 56px;
+  }
+  
+  .section-card:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Section Card States */
+.section-card.loading .section-header::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+  animation: loading-sweep 1.5s infinite;
+}
+
+@keyframes loading-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.section-card.error {
+  border-color: #ea4335;
+  box-shadow: 0 2px 8px rgba(234, 67, 53, 0.2);
+}
+
+.section-card.error::before {
+  background: #ea4335;
+  opacity: 1;
+}
+
+.section-card.success {
+  border-color: #34a853;
+  box-shadow: 0 2px 8px rgba(52, 168, 83, 0.2);
+}
+
+.section-card.success::before {
+  background: #34a853;
+  opacity: 1;
+}
+
+/* Remove problematic content animations */
+
+/* Improved Focus States */
+.section-header:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* Section Card Variants */
+.section-card.primary .section-header span:first-child {
+  color: #4285f4;
+}
+
+.section-card.success .section-header span:first-child {
+  color: #34a853;
+}
+
+.section-card.warning .section-header span:first-child {
+  color: #fbbc04;
+}
+
+.section-card.danger .section-header span:first-child {
+  color: #ea4335;
+}
+
+/* Compact Mode for Mobile */
+@media (max-width: 480px) {
+  .section-card.compact .section-header {
+    padding: 12px;
+  }
+  
+  .section-card.compact .section-header span:first-child {
+    font-size: 18px;
+  }
+  
+  .section-card.compact .section-header span:nth-child(2) {
+    font-size: 13px;
+  }
+  
+  .section-card.compact .expand-icon {
+    width: 24px;
+    height: 24px;
+  }
+}

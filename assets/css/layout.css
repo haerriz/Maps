@@ -1,0 +1,246 @@
+/* Layout Styles - Page structure and positioning */
+
+/* Main Layout */
+.container {
+  display: flex;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+#map {
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 465px;
+  min-width: 465px;
+  max-width: 465px;
+  background: #fff;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  border-right: 1px solid #e8eaed;
+  flex-shrink: 0;
+}
+
+.sidebar-header {
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #e8eaed;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.sidebar-content {
+  padding: 16px 24px;
+}
+
+/* Enhanced Section Cards */
+.section-card {
+  background: var(--bg-primary);
+  border-radius: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  position: relative;
+}
+
+.section-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
+}
+
+.section-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-color), #34a853);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.section-card.expanded::before {
+  opacity: 1;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  cursor: pointer;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  position: relative;
+  user-select: none;
+}
+
+.section-header:hover {
+  background: var(--bg-tertiary);
+}
+
+.section-header:active {
+  transform: scale(0.98);
+}
+
+.section-header span:first-child {
+  color: var(--accent-color);
+  font-size: 22px;
+  transition: transform 0.3s ease;
+}
+
+.section-card.expanded .section-header span:first-child {
+  transform: scale(1.1);
+}
+
+.section-header span:nth-child(2) {
+  flex: 1;
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+}
+
+.expand-icon {
+  color: var(--text-secondary);
+  transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+  background: var(--bg-primary);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.section-header:hover .expand-icon {
+  background: var(--accent-color);
+  color: white;
+  transform: scale(1.1);
+}
+
+.section-card.expanded .expand-icon {
+  transform: rotate(180deg) scale(1.1);
+  background: var(--accent-color);
+  color: white;
+}
+
+.section-content {
+  padding: 16px;
+  display: none;
+}
+
+.section-card.expanded .section-content {
+  display: block;
+}
+
+/* Mobile Controls */
+.mobile-controls {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .mobile-controls {
+    display: flex;
+  }
+}
+
+.mobile-toggle {
+  display: none;
+  background: #4285f4;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+/* Floating Action Button */
+.fab {
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  background: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1500;
+  transition: all 0.2s;
+}
+
+.fab:hover {
+  background: #3367d6;
+  transform: scale(1.1);
+}
+
+.fab .material-icons {
+  font-size: 24px;
+}
+
+/* Utility Layout Classes */
+.full-width {
+  width: 100%;
+}
+
+.button-row {
+  display: flex;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.button-flex {
+  flex: 1;
+}
+
+.time-controls {
+  display: flex;
+  gap: 5px;
+}
+
+.time-input {
+  flex: 1;
+  font-size: 11px;
+}
+
+.chip-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.control-buttons {
+  margin-bottom: 12px;
+}
+
+.search-container {
+  position: relative;
+}
+
+@media (max-width: 767px) {
+  .fab {
+    bottom: 120px;
+  }
+}

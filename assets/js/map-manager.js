@@ -54,6 +54,11 @@ class MapManager {
       window.tourManager.addStop(latlng);
     }
     
+    // Trigger location enhancement
+    document.dispatchEvent(new CustomEvent('locationAdded', {
+      detail: { lat: latlng.lat, lng: latlng.lng, name: latlng.name || title }
+    }));
+    
     return marker;
   }
 
@@ -181,21 +186,11 @@ class MapManager {
 
 // Global functions for compatibility
 function addCurrentLocationAsStop() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition((position) => {
-      const latlng = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-        name: 'Current Location'
-      };
-      if (window.mapManager) {
-        window.mapManager.addMarker(latlng);
-      }
-    }, (error) => {
-      alert('Unable to get your current location. Please check location permissions.');
-    });
+  // Use the location manager instead of direct geolocation
+  if (window.locationManager) {
+    window.locationManager.useMyLocation();
   } else {
-    alert('Geolocation is not supported by this browser.');
+    console.log('Location manager not available');
   }
 }
 
