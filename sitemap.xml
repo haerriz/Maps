@@ -1,15 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://maps.haerriz.com/</loc>
     <lastmod>2025-01-02</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://maps.haerriz.com/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://maps.haerriz.com/es/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://maps.haerriz.com/fr/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://maps.haerriz.com/de/" />
+    <xhtml:link rel="alternate" hreflang="hi" href="https://maps.haerriz.com/hi/" />
+    <xhtml:link rel="alternate" hreflang="zh" href="https://maps.haerriz.com/zh/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://maps.haerriz.com/ja/" />
   </url>
   <url>
-    <loc>https://maps.haerriz.com/404.html</loc>
+    <loc>https://maps.haerriz.com/trip-planner</loc>
     <lastmod>2025-01-02</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.1</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://maps.haerriz.com/route-optimizer</loc>
+    <lastmod>2025-01-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://maps.haerriz.com/ai-travel-assistant</loc>
+    <lastmod>2025-01-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
 </urlset>
