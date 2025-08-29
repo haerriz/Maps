@@ -26,6 +26,13 @@ class LocationManager {
       if (window.tourManager && window.tourManager.stops.length === 0) {
         window.tourManager.addStop(latlng);
       }
+      
+      // Update nearby places based on user location
+      setTimeout(() => {
+        if (window.nearbyPlacesManager) {
+          window.nearbyPlacesManager.loadNearbyPlaces();
+        }
+      }, 1000);
     } catch (error) {
       this.handleGeolocationError(error);
     }

@@ -20,18 +20,30 @@ class NearbyPlacesManager {
       return;
     }
     
-    nearbyContainer.innerHTML = '<p class="loading-text">🔍 Finding nearby places...</p>';
-    if (statusElement) statusElement.textContent = 'Loading nearby places...';
+    // Show location being used
+    const locationSource = this.getLocationSource();
+    nearbyContainer.innerHTML = `<p class="loading-text">🔍 Finding places near ${locationSource}...</p>`;
+    if (statusElement) statusElement.textContent = `Searching near ${locationSource}...`;
     
     try {
       const places = await this.fetchNearbyPlaces(center.lat, center.lng);
       this.displayNearbyPlaces(places);
-      if (statusElement) statusElement.textContent = `Found ${places.length} nearby places`;
+      if (statusElement) statusElement.textContent = `Found ${places.length} places near ${locationSource}`;
     } catch (error) {
       const fallbackPlaces = this.generateFallbackPlaces(center.lat, center.lng);
       this.displayNearbyPlaces(fallbackPlaces);
-      if (statusElement) statusElement.textContent = 'Showing nearby place types';
+      if (statusElement) statusElement.textContent = `Showing place types near ${locationSource}`;
     }
+  }
+
+  getLocationSource() {
+    if (window.locationManager && window.locationManager.userLocation) {
+      return 'your location';
+    }
+    if (window.tourManager && window.tourManager.stops.length > 0) {
+      return 'selected marker';
+    }
+    return 'map center';
   }
 
   generateFallbackPlaces(lat, lng) {
@@ -45,10 +57,26 @@ class NearbyPlacesManager {
   }
 
   getCurrentMapCenter() {
+    // Priority: User location > Last marker > Map center
+    if (window.locationManager && window.locationManager.userLocation) {
+      return {
+        lat: window.locationManager.userLocation.lat,
+        lng: window.locationManager.userLocation.lng
+      };
+    }
+    
+    // Use last added marker if available
+    if (window.tourManager && window.tourManager.stops.length > 0) {
+      const lastStop = window.tourManager.stops[window.tourManager.stops.length - 1];
+      return { lat: lastStop.lat, lng: lastStop.lng };
+    }
+    
+    // Fallback to map center
     if (window.mapManager && window.mapManager.map) {
       const center = window.mapManager.map.getCenter();
       return { lat: center.lat, lng: center.lng };
     }
+    
     return null;
   }
 
