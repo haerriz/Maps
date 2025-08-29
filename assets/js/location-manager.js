@@ -6,12 +6,6 @@ class LocationManager {
   }
 
   async useMyLocation() {
-    if (!navigator.geolocation) {
-      this.showLocationError('Geolocation is not supported by this browser.');
-      await this.fallbackToIPLocation();
-      return;
-    }
-
     try {
       const position = await this.requestLocationPermission();
       
@@ -37,7 +31,24 @@ class LocationManager {
     }
   }
 
-  requestLocationPermission() {
+  async requestLocationPermission() {
+    // Check if geolocation is available and not blocked
+    if (!navigator.geolocation) {
+      throw new Error('Geolocation not supported');
+    }
+
+    // Check permissions first if API is available
+    if ('permissions' in navigator) {
+      try {
+        const permission = await navigator.permissions.query({name: 'geolocation'});
+        if (permission.state === 'denied') {
+          throw new Error('Geolocation permission denied');
+        }
+      } catch (error) {
+        // Permissions API not supported, continue with geolocation
+      }
+    }
+
     return new Promise((resolve, reject) => {
       const options = {
         enableHighAccuracy: true,
