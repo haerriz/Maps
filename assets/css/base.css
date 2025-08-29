@@ -6,6 +6,11 @@
 @import 'components.css';
 @import 'ui-components.css';
 @import 'map-features.css';
+@import 'animations.css';
+@import 'visual-enhancements.css';
+@import 'accessibility.css';
+@import 'dark-mode.css';
+@import 'section-enhancements.css';
 
 /* Global Reset */
 * {

@@ -23,6 +23,7 @@
     transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
     z-index: 1003;
     flex-shrink: 1;
+    display: block !important;
   }
 
   .sidebar.mobile-expanded {
@@ -150,13 +151,14 @@
 
   /* Mobile tour stats */
   .tour-stats {
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
     padding: 12px;
     border-radius: 8px;
     margin-bottom: 12px;
     font-size: 12px;
-    border-left: 3px solid #4285f4;
-    box-shadow: 0 1px 3px rgba(60,64,67,0.1);
+    border-left: 3px solid var(--accent-color);
+    box-shadow: 0 1px 3px var(--shadow-color);
+    color: var(--text-primary);
   }
 
   .tour-stops h3 {
@@ -240,15 +242,12 @@
     left: 16px;
     right: 16px;
     z-index: 1002;
-    display: flex;
+    display: flex !important;
     gap: 8px;
-  }
-
-  /* Hide mobile controls on desktop */
-  @media (min-width: 768px) {
-    .mobile-controls {
-      display: none !important;
-    }
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .mobile-search {

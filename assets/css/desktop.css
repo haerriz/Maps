@@ -11,23 +11,24 @@
 
   /* Tour Stats */
   .tour-stats {
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
     padding: 16px;
     border-radius: 12px;
     margin-bottom: 16px;
     font-size: 13px;
-    border-left: 4px solid #4285f4;
-    box-shadow: 0 1px 3px rgba(60,64,67,0.1);
+    border-left: 4px solid var(--accent-color);
+    box-shadow: 0 1px 3px var(--shadow-color);
+    color: var(--text-primary);
   }
 
   /* Transport Info */
   .transport-info {
-    background: white;
+    background: var(--bg-primary);
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 1px 3px rgba(60,64,67,.3), 0 4px 8px 3px rgba(60,64,67,.15);
-    border: 1px solid #dadce0;
+    box-shadow: 0 1px 3px var(--shadow-color), 0 4px 8px 3px var(--shadow-color);
+    border: 1px solid var(--border-color);
     display: none;
   }
 

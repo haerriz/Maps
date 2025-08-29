@@ -1,0 +1,200 @@
+/* Visual Enhancements - Improved aesthetics and feedback */
+
+/* Enhanced shadows and depth */
+.section-card {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.section-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  transform: translateY(-1px);
+}
+
+/* Gradient backgrounds */
+.sidebar-header {
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4285f4 0%, #3367d6 100%);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #34a853 0%, #2d7d32 100%);
+}
+
+/* Enhanced visual feedback */
+.nearby-place::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: #4285f4;
+  transform: scaleY(0);
+  transition: transform 0.2s ease;
+}
+
+.nearby-place {
+  position: relative;
+}
+
+.nearby-place:hover::before {
+  transform: scaleY(1);
+}
+
+/* Improved loading states */
+.loading-text {
+  position: relative;
+}
+
+.loading-text::after {
+  content: '';
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  border: 2px solid #4285f4;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translateY(-50%) rotate(0deg); }
+  100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* Status indicators */
+.nearby-status {
+  position: relative;
+  overflow: hidden;
+}
+
+.nearby-status::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(66, 133, 244, 0.1), transparent);
+  animation: sweep 2s infinite;
+}
+
+@keyframes sweep {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Enhanced form elements */
+.search-input-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.search-input-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: #4285f4;
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.search-input-wrapper:focus-within::after {
+  width: 100%;
+}
+
+/* Improved toggle switches */
+.slider {
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.slider:before {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Enhanced chips */
+.chip {
+  position: relative;
+  overflow: hidden;
+}
+
+.chip::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(66, 133, 244, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.chip:hover::before {
+  width: 100%;
+  height: 100%;
+}
+
+/* Progress indicators */
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: #e8eaed;
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4285f4, #34a853);
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+/* Floating elements */
+.fab {
+  box-shadow: 0 6px 20px rgba(66, 133, 244, 0.3);
+}
+
+.fab:hover {
+  box-shadow: 0 8px 25px rgba(66, 133, 244, 0.4);
+}
+
+/* Enhanced mobile controls */
+.mobile-controls {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+/* Subtle animations for stats */
+.stat-value {
+  position: relative;
+}
+
+.stat-value::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.stat-row:hover .stat-value::after {
+  transform: scaleX(1);
+}
