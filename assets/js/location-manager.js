@@ -54,9 +54,9 @@ class LocationManager {
   requestLocationPermission() {
     return new Promise((resolve, reject) => {
       const options = {
-        enableHighAccuracy: false,
-        timeout: 10000,
-        maximumAge: 600000
+        enableHighAccuracy: true,
+        timeout: 8000,
+        maximumAge: 300000
       };
       
       navigator.geolocation.getCurrentPosition(
@@ -100,19 +100,13 @@ class LocationManager {
   }
 
   async autoDetectLocation() {
-    // Check if user previously denied permission
-    if (this.hasLocationPermissionDenied()) {
-      console.log('Location permission previously denied, using IP location');
-      await this.fallbackToIPLocation();
-      return;
-    }
-
     if (!navigator.geolocation) {
       console.log('Geolocation not supported, using IP location');
       await this.fallbackToIPLocation();
       return;
     }
 
+    // Always try geolocation first, regardless of previous denials
     try {
       const position = await this.requestLocationPermission();
       const { latitude, longitude } = position.coords;
@@ -130,6 +124,8 @@ class LocationManager {
         window.mapManager.showUserLocation(latitude, longitude, position.coords.accuracy);
       }
       
+      console.log('Using precise GPS location');
+      
       setTimeout(() => {
         if (window.nearbyPlacesManager) {
           window.nearbyPlacesManager.loadNearbyPlaces();
@@ -137,32 +133,14 @@ class LocationManager {
       }, 1000);
     } catch (error) {
       console.log('Location access denied, using IP location');
+      this.saveLocationPermission(false);
       await this.fallbackToIPLocation();
     }
   }
 
   async fallbackToIPLocation() {
-    try {
-      const ipLocation = await Utils.getUserLocation();
-      if (ipLocation) {
-        this.userLocation = {
-          lat: ipLocation.lat,
-          lng: ipLocation.lng,
-          name: `${ipLocation.city}, ${ipLocation.country}`
-        };
-        
-        if (window.mapManager) {
-          window.mapManager.centerOnLocation(ipLocation.lat, ipLocation.lng, 10);
-        }
-        
-        console.log(`Using IP-based location: ${ipLocation.city}, ${ipLocation.country}`);
-      } else {
-        this.useDefaultLocation();
-      }
-    } catch (error) {
-      console.log('IP location failed, using default location');
-      this.useDefaultLocation();
-    }
+    // Skip IP location and go directly to default
+    this.useDefaultLocation();
     
     // Load nearby places
     setTimeout(() => {
@@ -202,8 +180,8 @@ class LocationManager {
       const time = localStorage.getItem('locationPermissionTime');
       
       if (permission === 'denied' && time) {
-        const daysSince = (Date.now() - parseInt(time)) / (1000 * 60 * 60 * 24);
-        return daysSince < 7; // Don't ask again for 7 days
+        const hoursSince = (Date.now() - parseInt(time)) / (1000 * 60 * 60);
+        return hoursSince < 1; // Only skip for 1 hour, then try again
       }
     } catch (error) {
       console.log('Could not check location permission status');
@@ -252,10 +230,21 @@ function quickAddLocation(locationName) {
 window.addEventListener('DOMContentLoaded', () => {
   window.locationManager = new LocationManager();
   
-  // Auto-detect location on load (only if not already initialized)
-  setTimeout(() => {
-    if (!window.locationManager.userLocation) {
-      window.locationManager.autoDetectLocation();
+  // Clear old permission denials on fresh page load
+  try {
+    const lastDenial = localStorage.getItem('locationPermissionTime');
+    if (lastDenial) {
+      const hoursSince = (Date.now() - parseInt(lastDenial)) / (1000 * 60 * 60);
+      if (hoursSince > 1) {
+        localStorage.removeItem('locationPermission');
+        localStorage.removeItem('locationPermissionTime');
+        console.log('Cleared old location permission denial');
+      }
     }
-  }, 2000);
+  } catch (error) {
+    console.log('Could not clear old permissions');
+  }
+  
+  // Don't auto-detect location to avoid user gesture violation
+  // Location will be requested when user clicks "My Location" button
 });

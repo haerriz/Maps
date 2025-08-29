@@ -5,7 +5,7 @@ class LocationInitializer {
       // Try to get user's real location via IP
       const userLocation = await Utils.getUserLocation();
       
-      if (userLocation) {
+      if (userLocation && userLocation.lat && userLocation.lng && !isNaN(userLocation.lat) && !isNaN(userLocation.lng)) {
         // Update config with real location
         CONFIG.DEFAULT_CENTER = [userLocation.lat, userLocation.lng];
         
@@ -34,18 +34,8 @@ class LocationInitializer {
       return await LocationInitializer.initializeUserLocation();
     }
 
-    // Check permissions first
-    if ('permissions' in navigator) {
-      try {
-        const permission = await navigator.permissions.query({name: 'geolocation'});
-        if (permission.state === 'denied') {
-          console.log('Geolocation permission denied, using IP location');
-          return await LocationInitializer.initializeUserLocation();
-        }
-      } catch (error) {
-        console.log('Permissions API not supported');
-      }
-    }
+    // Always try geolocation, don't pre-check permissions
+    console.log('Attempting to get precise location...');
     
     try {
       return new Promise((resolve) => {
@@ -81,9 +71,9 @@ class LocationInitializer {
             resolve(ipLocation);
           },
           {
-            enableHighAccuracy: false,
-            timeout: 2000,
-            maximumAge: 600000 // 10 minutes
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 300000 // 5 minutes
           }
         );
       });
@@ -94,15 +84,11 @@ class LocationInitializer {
   }
 }
 
-// Auto-initialize when DOM is ready
+// Auto-initialize when DOM is ready - use default location
 window.addEventListener('DOMContentLoaded', async () => {
-  // Try browser geolocation first, then IP-based
-  try {
-    await LocationInitializer.initializeWithBrowserLocation();
-  } catch (error) {
-    console.log('Location initialization failed, using default');
-    CONFIG.DEFAULT_CENTER = [13.0827, 80.2707]; // Chennai, India
-  }
+  // Set default location (Chennai, India)
+  CONFIG.DEFAULT_CENTER = [13.0827, 80.2707];
+  console.log('Map initialized with default location: Chennai, India');
 });
 
 // Export for use in other modules

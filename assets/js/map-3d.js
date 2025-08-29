@@ -303,7 +303,6 @@ class Map3DManager {
     
     document.head.appendChild(terrainStyle);
   }
-}
 
   checkTileVisibility() {
     const tiles = document.querySelectorAll('.leaflet-tile');
