@@ -96,6 +96,7 @@
   <link rel="stylesheet" href="assets/css/directions-panel.css" />
   <link rel="stylesheet" href="assets/css/map-3d.css" />
   <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/navigation-links.css" />
   <link rel="stylesheet" href="assets/css/chat.css" />
   <link rel="stylesheet" href="assets/css/desktop.css" />
   <link rel="stylesheet" href="assets/css/tablet.css" />
@@ -493,13 +494,60 @@
             </div>
           </div>
 
+          <!-- Quick Links (Collapsible) -->
+          <div class="section-card collapsible">
+            <div class="section-header" onclick="toggleSection('quick-links')">
+              <span class="material-icons">info</span>
+              <span>About & Help</span>
+              <span class="material-icons expand-icon">expand_more</span>
+            </div>
+            <div class="section-content" id="quick-links">
+              <div class="quick-links-grid">
+                <a href="/about" class="quick-link">
+                  <span class="material-icons">business</span>
+                  <span>About Us</span>
+                </a>
+                <a href="/features" class="quick-link">
+                  <span class="material-icons">star</span>
+                  <span>Features</span>
+                </a>
+                <a href="/help" class="quick-link">
+                  <span class="material-icons">help</span>
+                  <span>Help & FAQ</span>
+                </a>
+                <a href="/api" class="quick-link">
+                  <span class="material-icons">code</span>
+                  <span>API Docs</span>
+                </a>
+                <a href="/blog" class="quick-link">
+                  <span class="material-icons">article</span>
+                  <span>Travel Blog</span>
+                </a>
+                <a href="/privacy" class="quick-link">
+                  <span class="material-icons">security</span>
+                  <span>Privacy</span>
+                </a>
+              </div>
+              
+              <div class="ecosystem-section">
+                <h4>Haerriz Network</h4>
+                <div class="ecosystem-links-grid">
+                  <a href="https://haerriz.com" target="_blank" rel="noopener" class="ecosystem-link">
+                    🌐 Haerriz.com
+                  </a>
+                  <a href="https://haerriz.blogspot.com" target="_blank" rel="noopener" class="ecosystem-link">
+                    📝 Tech Blog
+                  </a>
+                  <a href="https://haerriztrendz.in" target="_blank" rel="noopener" class="ecosystem-link">
+                    👕 Fashion Store
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="footer-text">
             <small class="footer-small">Powered by <strong>Haerriz</strong> • © 2025</small>
-            <div class="ecosystem-links" style="margin-top: 8px; font-size: 10px;">
-              <a href="https://haerriz.com" target="_blank" rel="noopener" style="color: #4285f4; text-decoration: none; margin-right: 8px;">🌐 Haerriz.com</a>
-              <a href="https://haerriz.blogspot.com" target="_blank" rel="noopener" style="color: #4285f4; text-decoration: none; margin-right: 8px;">📝 Blog</a>
-              <a href="https://haerriztrendz.in" target="_blank" rel="noopener" style="color: #4285f4; text-decoration: none;">👕 Trendz</a>
-            </div>
           </div>
           
           <!-- AI Assistant (Collapsible) -->
