@@ -240,6 +240,14 @@ function toggleMobileSheet() {
   }
 }
 
+function setTravelMode(mode, btn) {
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const sel = document.getElementById('travelMode');
+  if (sel) sel.value = mode;
+  updateTravelMode();
+}
+
 // Initialize UI manager
 window.addEventListener('DOMContentLoaded', () => {
   window.uiManager = new UIManager();

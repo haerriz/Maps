@@ -330,14 +330,21 @@
     <div class="sidebar">
       <div class="sidebar-header" onclick="toggleMobileSheet()">
         <div class="bottom-sheet-handle"></div>
-        <h1><span class="material-icons">travel_explore</span> Haerriz Trip Planner</h1>
-        <p>AI-Powered Global Travel Route Optimizer</p>
-        <small class="subtitle-text">Plan • Optimize • Explore • Discover</small>
-        <!-- Hidden SEO content -->
-        <div style="display:none;">
-          <h2>Free AI Trip Planner 2025</h2>
-          <p>Best free trip planner with AI route optimization, real-time traffic, weather forecasts, and multi-modal transport planning for 200+ countries worldwide.</p>
+        <div class="header-top">
+          <div class="header-brand">
+            <div class="header-icon">
+              <span class="material-icons">travel_explore</span>
+            </div>
+            <div class="header-text">
+              <h1>Haerriz Maps</h1>
+              <p>AI Trip Planner</p>
+            </div>
+          </div>
+          <button class="header-theme-btn" onclick="event.stopPropagation(); window.themeManager && window.themeManager.toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode">
+            <span class="material-icons" id="themeIcon">dark_mode</span>
+          </button>
         </div>
+        <div style="display:none;"><h2>Free AI Trip Planner 2025</h2><p>Best free trip planner with AI route optimization, real-time traffic, weather forecasts, and multi-modal transport planning for 200+ countries worldwide.</p></div>
       </div>
       
       <div class="sidebar-content">
@@ -346,10 +353,22 @@
         <div class="tour-stops">
           <h3><span class="material-icons">location_on</span> Your Journey Stops</h3>
           <div id="tourStats" class="tour-stats">
-            <div class="stat-row"><span>Stops:</span> <span id="totalStops" class="stat-value">0</span></div>
-            <div class="stat-row"><span>Distance:</span> <span id="totalDistance" class="stat-value">0 km</span></div>
-            <div class="stat-row"><span>Route:</span> <span id="routeType" class="stat-value">Direct</span></div>
-            <div class="stat-row"><span>Traffic:</span> <span id="trafficStatus" class="stat-value">Off</span></div>
+            <div class="stat-card">
+              <span class="stat-icon material-icons">location_on</span>
+              <div class="stat-body"><span class="stat-label">Stops</span><span id="totalStops" class="stat-value">0</span></div>
+            </div>
+            <div class="stat-card">
+              <span class="stat-icon material-icons">straighten</span>
+              <div class="stat-body"><span class="stat-label">Distance</span><span id="totalDistance" class="stat-value">0 km</span></div>
+            </div>
+            <div class="stat-card">
+              <span class="stat-icon material-icons">route</span>
+              <div class="stat-body"><span class="stat-label">Route</span><span id="routeType" class="stat-value">Direct</span></div>
+            </div>
+            <div class="stat-card">
+              <span class="stat-icon material-icons">traffic</span>
+              <div class="stat-body"><span class="stat-label">Traffic</span><span id="trafficStatus" class="stat-value">Off</span></div>
+            </div>
           </div>
           <div id="stopsList">
             <p class="empty-stops">Click on the map to add stops</p>
@@ -398,16 +417,17 @@
           <!-- Quick Settings -->
           <div class="section-card">
             <div class="quick-settings">
-              <select id="travelMode" onchange="updateTravelMode()" class="mode-select">
-                <option value="driving">🚗 Driving</option>
-                <option value="walking">🚶 Walking</option>
-                <option value="cycling">🚴 Cycling</option>
-                <option value="transit">🚌 Transit</option>
-              </select>
+              <select id="travelMode" aria-label="Travel mode" class="mode-select" style="display:none"></select>
+              <div class="mode-tabs" role="group" aria-label="Travel mode">
+                <button class="mode-tab active" data-mode="driving" onclick="setTravelMode('driving',this)">🚗<span>Drive</span></button>
+                <button class="mode-tab" data-mode="walking" onclick="setTravelMode('walking',this)">🚶<span>Walk</span></button>
+                <button class="mode-tab" data-mode="cycling" onclick="setTravelMode('cycling',this)">🚴<span>Bike</span></button>
+                <button class="mode-tab" data-mode="transit" onclick="setTravelMode('transit',this)">🚌<span>Bus</span></button>
+              </div>
               <label class="toggle-switch">
                 <input type="checkbox" id="trafficToggle" onchange="updateTrafficMode()" />
                 <span class="slider"></span>
-                <span class="toggle-label">Live Traffic</span>
+                <span class="toggle-label">Traffic</span>
               </label>
             </div>
           </div>
@@ -553,7 +573,7 @@
           </div>
 
           <div class="footer-text">
-            <small class="footer-small">Powered by <strong>Haerriz</strong> • © 2025</small>
+            <small class="footer-small">Powered by <strong>Haerriz</strong> • © 2026</small>
           </div>
           
           <!-- AI Assistant (Collapsible) -->
@@ -621,7 +641,7 @@
   <script src="assets/js/location-initializer.js?v=2025010206"></script>
   <script src="assets/js/map-manager.js?v=2026040805"></script>
   <script src="assets/js/location-manager.js?v=2025010214"></script>
-  <script src="assets/js/nearby-places.js?v=2026040805"></script>
+  <script src="assets/js/nearby-places.js?v=2026040806"></script>
   <script src="assets/js/route-calculator.js?v=2026040805"></script>
   <script src="assets/js/map-3d.js?v=2026040805"></script>
   <script src="assets/js/navigation-manager.js?v=2025010202"></script>

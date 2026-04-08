@@ -2,13 +2,12 @@
 
 /* Enhanced shadows and depth */
 .section-card {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  transition: box-shadow 0.25s ease;
 }
 
 .section-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.10);
 }
 
 /* Gradient backgrounds */

@@ -13,24 +13,78 @@ body {
 
 /* Headers */
 .sidebar-header h1 {
-  font-size: 22px;
-  font-weight: 400;
+  font-size: 17px;
+  font-weight: 600;
   color: #202124;
-  margin-bottom: 4px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sidebar-header h1 .material-icons {
-  color: #4285f4;
-  font-size: 24px;
+  margin: 0;
+  letter-spacing: -0.2px;
+  line-height: 1.2;
 }
 
 .sidebar-header p {
   color: #5f6368;
-  font-size: 14px;
-  margin-bottom: 4px;
+  font-size: 12px;
+  margin: 2px 0 0;
+  font-weight: 400;
+}
+
+/* Header brand layout */
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.header-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #4285f4 0%, #1a73e8 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(26,115,232,0.35);
+}
+
+.header-icon .material-icons {
+  color: white;
+  font-size: 22px;
+}
+
+.header-text {
+  min-width: 0;
+}
+
+.header-theme-btn {
+  width: 36px;
+  height: 36px;
+  background: #f1f3f4;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.header-theme-btn:hover {
+  background: #e8eaed;
+}
+
+.header-theme-btn .material-icons {
+  font-size: 18px;
+  color: #5f6368;
 }
 
 .subtitle-text {
@@ -113,7 +167,7 @@ body {
   font-size: 16px;
 }
 
-/* Stats */
+/* Stats grid cards */
 .stat-row {
   display: flex;
   justify-content: space-between;
@@ -126,13 +180,51 @@ body {
   margin-bottom: 0;
 }
 
-.stat-value {
-  font-weight: 500;
-  color: #4285f4;
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e8eaed;
+  transition: border-color 0.2s;
 }
 
-.stat-value[title*="Traffic"] {
-  cursor: help;
+.stat-card:hover {
+  border-color: #4285f4;
+}
+
+.stat-icon {
+  font-size: 18px !important;
+  color: #4285f4;
+  flex-shrink: 0;
+}
+
+.stat-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: #5f6368;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.stat-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #202124;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+  line-height: 1.2;
 }
 
 /* Single Stop Message */

@@ -77,13 +77,12 @@
   }
 }
 
-/* Tour Stats */
+/* Tour Stats — 2×2 icon grid */
 .tour-stats {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
   margin-bottom: 16px;
-  border: 1px solid #e9ecef;
 }
 
 /* Stop Items */
@@ -91,17 +90,18 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: 10px 12px;
   margin-bottom: 6px;
   background: white;
   border: 1px solid #e8eaed;
-  border-radius: 8px;
+  border-radius: 10px;
   transition: all 0.2s;
 }
 
 .stop-item:hover {
-  background: #f8f9fa;
+  background: #f0f6ff;
   border-color: #4285f4;
+  box-shadow: 0 2px 8px rgba(66,133,244,0.1);
 }
 
 .stop-info {
@@ -109,17 +109,22 @@
   align-items: center;
   gap: 8px;
   flex: 1;
+  min-width: 0;
 }
 
 .stop-info .material-icons {
   color: #4285f4;
   font-size: 16px;
+  flex-shrink: 0;
 }
 
 .stop-name {
   font-size: 13px;
   color: #202124;
   font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Nearby Places */
@@ -127,12 +132,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   padding: 8px 12px;
   background: #e8f0fe;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 12px;
   color: #1a73e8;
+  font-weight: 500;
 }
 
 .nearby-status .material-icons {
@@ -142,62 +148,95 @@
 .nearby-tabs {
   display: flex;
   gap: 4px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  background: #f1f3f4;
+  padding: 4px;
+  border-radius: 12px;
 }
 
 .nearby-tab {
   flex: 1;
-  padding: 6px 4px;
+  padding: 8px 4px;
   font-size: 11px;
-  border: 1px solid #dadce0;
-  border-radius: 6px;
-  background: #f8f9fa;
+  font-weight: 500;
+  font-family: 'Google Sans', sans-serif;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: #5f6368;
 }
 
-.nearby-tab:hover { background: #e8f0fe; border-color: #4285f4; }
-.nearby-tab.active { background: #4285f4; color: #fff; border-color: #4285f4; }
+.nearby-tab:hover {
+  background: rgba(255,255,255,0.7);
+}
+
+.nearby-tab.active {
+  background: white;
+  color: #1a73e8;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
 
 .nearby-places {
-  max-height: 200px;
+  max-height: 260px;
   overflow-y: auto;
+  border-radius: 12px;
   border: 1px solid #e8eaed;
-  border-radius: 8px;
-  background: #f8f9fa;
+  background: white;
+  scrollbar-width: thin;
+  scrollbar-color: #dadce0 transparent;
+}
+
+.nearby-places::-webkit-scrollbar {
+  width: 4px;
+}
+
+.nearby-places::-webkit-scrollbar-thumb {
+  background: #dadce0;
+  border-radius: 4px;
 }
 
 .nearby-place {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
-  border-bottom: 1px solid #e8eaed;
+  padding: 11px 14px;
+  border-bottom: 1px solid #f1f3f4;
   cursor: pointer;
-  transition: background 0.2s;
-}
-
-.nearby-place:hover {
-  background: #e8f0fe;
+  transition: background 0.15s;
+  position: relative;
 }
 
 .nearby-place:last-child {
   border-bottom: none;
 }
 
+.nearby-place:hover {
+  background: #f0f6ff;
+}
+
 .place-icon {
   font-size: 18px;
-  width: 24px;
-  text-align: center;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f3f4;
+  border-radius: 8px;
+  flex-shrink: 0;
 }
 
 .place-info {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+}
   gap: 2px;
 }
 

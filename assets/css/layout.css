@@ -30,7 +30,7 @@
 }
 
 .sidebar-header {
-  padding: 24px 24px 16px;
+  padding: 16px 20px;
   border-bottom: 1px solid #e8eaed;
   background: #fff;
   position: sticky;
@@ -39,7 +39,7 @@
 }
 
 .sidebar-content {
-  padding: 16px 24px;
+  padding: 16px 16px 32px;
 }
 
 /* Enhanced Section Cards */
@@ -55,7 +55,6 @@
 
 .section-card:hover {
   box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-  transform: translateY(-2px);
 }
 
 .section-card::before {
@@ -139,7 +138,7 @@
 }
 
 .section-content {
-  padding: 16px;
+  padding: 16px 20px 20px;
   display: none;
 }
 
@@ -168,6 +167,29 @@
   font-size: 12px;
   cursor: pointer;
   margin-top: 8px;
+}
+
+/* Sidebar scrollbar */
+.sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: #dadce0 transparent;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: #dadce0;
+  border-radius: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: #bdc1c6;
 }
 
 /* Floating Action Button */

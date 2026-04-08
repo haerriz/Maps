@@ -124,21 +124,23 @@ body {
 }
 
 /* Nearby places */
-.nearby-tab { background: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary); }
-.nearby-tab:hover { background: var(--bg-tertiary); }
-.nearby-tab.active { background: #4285f4; color: #fff; border-color: #4285f4; }
+.nearby-tabs { background: var(--bg-tertiary); }
+.nearby-tab { color: var(--text-secondary); }
+.nearby-tab:hover { background: rgba(255,255,255,0.05); }
+.nearby-tab.active { background: var(--bg-primary); color: var(--accent-color); box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
 
 .nearby-places {
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-primary);
   border-color: var(--border-color);
 }
 
 .nearby-place {
-  border-color: var(--border-color);
+  background-color: var(--bg-primary);
+  border-color: var(--bg-tertiary);
 }
 
 .nearby-place:hover {
-  background-color: var(--bg-tertiary);
+  background-color: var(--bg-secondary);
 }
 
 .place-name {
@@ -169,16 +171,72 @@ body {
 
 /* Tour stats */
 .tour-stats {
+  /* grid is defined in map-features.css */
+}
+
+.stat-card {
   background-color: var(--bg-secondary);
   border-color: var(--border-color);
 }
 
-.tour-stats .stat-row {
+.stat-label {
+  color: var(--text-secondary);
+}
+
+.stat-value {
   color: var(--text-primary);
 }
 
-.tour-stats .stat-value {
+.stat-icon {
   color: var(--accent-color);
+}
+
+/* Header brand */
+.header-theme-btn {
+  background: var(--bg-tertiary);
+}
+
+.header-theme-btn:hover {
+  background: var(--border-color);
+}
+
+.header-theme-btn .material-icons {
+  color: var(--text-secondary);
+}
+
+/* Mode tabs */
+.mode-tabs {
+  background: var(--bg-tertiary);
+}
+
+.mode-tab {
+  color: var(--text-secondary);
+}
+
+.mode-tab span {
+  color: var(--text-secondary);
+}
+
+.mode-tab:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.mode-tab.active {
+  background: var(--bg-primary);
+}
+
+.mode-tab.active span {
+  color: var(--accent-color);
+}
+
+/* Toggle switch */
+.toggle-switch {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.toggle-label {
+  color: var(--text-primary);
 }
 
 /* Mobile controls */
@@ -209,12 +267,13 @@ body {
     color: var(--text-primary) !important;
   }
   
-  .tour-stats .stat-row {
-    color: var(--text-primary) !important;
+  .stat-card {
+    background-color: var(--bg-secondary) !important;
+    border-color: var(--border-color) !important;
   }
   
-  .tour-stats .stat-value {
-    color: var(--accent-color) !important;
+  .stat-value {
+    color: var(--text-primary) !important;
   }
 }
 
