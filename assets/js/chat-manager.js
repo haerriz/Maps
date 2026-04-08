@@ -997,13 +997,14 @@ class ChatManager {
     
     try {
       // Use Overpass API for attractions (free)
+      // Search globally by city name rather than bbox (bbox is not defined here)
       const query = `
         [out:json][timeout:25];
         (
-          node["tourism"~"^(attraction|museum|monument)$"]["name"~"${city}",i](bbox);
-          way["tourism"~"^(attraction|museum|monument)$"]["name"~"${city}",i](bbox);
+          node["tourism"~"^(attraction|museum|monument)$"]["name"~"${city}",i];
+          way["tourism"~"^(attraction|museum|monument)$"]["name"~"${city}",i];
         );
-        out center meta;
+        out center meta 5;
       `;
       
       const response = await fetch('https://overpass-api.de/api/interpreter', {

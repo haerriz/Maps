@@ -25,7 +25,7 @@ class WeatherManager {
       const weatherPromises = tourStops.slice(0, 5).map(async (stop, index) => {
         try {
           // Using wttr.in weather service as fallback
-          const wttrResponse = await fetch(`https://wttr.in/${stop.latlng.lat},${stop.latlng.lng}?format=j1`);
+          const wttrResponse = await fetch(`https://wttr.in/${stop.lat},${stop.lng}?format=j1`);
           if (wttrResponse.ok) {
             const wttrData = await wttrResponse.json();
             const current = wttrData.current_condition[0];

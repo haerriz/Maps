@@ -92,21 +92,17 @@ class SearchManager {
 
   centerAndAddLocation(lat, lng, name) {
     // Center map first, then add marker
+    // addMarker internally calls tourManager.addStop(), so do not call it separately
     if (window.mapManager) {
       window.mapManager.centerOnLocation(lat, lng, 15);
-      window.mapManager.addMarker({ lat, lng });
-    }
-    if (window.tourManager) {
-      window.tourManager.addStop({ lat, lng, name });
+      window.mapManager.addMarker({ lat, lng, name });
     }
   }
 
   addAsStop(lat, lng, name) {
-    if (window.tourManager) {
-      window.tourManager.addStop({ lat, lng, name });
-    }
+    // addMarker internally calls tourManager.addStop(), so do not call it separately
     if (window.mapManager) {
-      window.mapManager.addMarker({ lat, lng });
+      window.mapManager.addMarker({ lat, lng, name });
     }
     this.hideSuggestions();
   }

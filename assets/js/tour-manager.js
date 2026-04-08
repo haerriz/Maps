@@ -44,10 +44,11 @@ class TourManager {
       if (data && data.display_name) {
         // Extract meaningful location name
         const address = data.address || {};
-        const name = address.amenity || address.shop || address.building || 
-                    address.house_number && address.road ? `${address.house_number} ${address.road}` :
-                    address.road || address.suburb || address.city || 
-                    data.display_name.split(',')[0];
+        const name = address.amenity || address.shop || address.building ||
+                    (address.house_number && address.road
+                      ? `${address.house_number} ${address.road}`
+                      : address.road || address.suburb || address.city ||
+                        data.display_name.split(',')[0]);
         return name || (this.stops.length === 0 ? 'Starting Point' : `Stop ${this.stops.length + 1}`);
       }
     } catch (error) {

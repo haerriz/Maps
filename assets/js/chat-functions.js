@@ -10,20 +10,14 @@ function sendMessage() {
   }
 }
 
+// Fix #5: was calling sendMessage(message) which ignores the argument;
+// sendQuickMessage sets the input value then sends it properly.
 function sendQuickMessage(message) {
   if (window.chatManager) {
-    window.chatManager.sendMessage(message);
+    window.chatManager.sendQuickMessage(message);
   }
 }
 
-// Handle Enter key in chat input
-document.addEventListener('DOMContentLoaded', () => {
-  const chatInput = document.getElementById('chatInput');
-  if (chatInput) {
-    chatInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        sendMessage();
-      }
-    });
-  }
-});
+// Fix #6: Enter key listener removed — ChatManager.setupEventListeners() already
+// attaches an Enter listener to #chatInput. Adding a second one here caused
+// the keypress event to fire sendMessage() twice.

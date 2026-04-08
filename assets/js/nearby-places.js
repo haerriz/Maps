@@ -203,13 +203,9 @@ class NearbyPlacesManager {
 
   addNearbyPlace(lat, lng, name) {
     const location = { lat: lat, lng: lng, name: name };
-    
+    // addMarker internally calls tourManager.addStop(); do not call it separately
     if (window.mapManager) {
       window.mapManager.addMarker(location);
-    }
-    
-    if (window.tourManager) {
-      window.tourManager.addStop(location);
     }
   }
 

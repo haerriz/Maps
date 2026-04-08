@@ -193,10 +193,8 @@ class LocationManager {
           const result = results[0];
           if (window.mapManager) {
             window.mapManager.centerOnLocation(result.lat, result.lng, 12);
+            // addMarker internally calls tourManager.addStop(), do not call it separately
             window.mapManager.addMarker(result);
-          }
-          if (window.tourManager) {
-            window.tourManager.addStop(result);
           }
         }
       });
