@@ -135,11 +135,3 @@ class RouteCalculator {
 window.addEventListener('DOMContentLoaded', () => {
   window.routeCalculator = new RouteCalculator();
 });
-    return this.currentRoute;
-  }
-}
-
-// Initialize
-window.addEventListener('DOMContentLoaded', () => {
-  window.routeCalculator = new RouteCalculator();
-});

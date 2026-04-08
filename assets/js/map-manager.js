@@ -174,9 +174,16 @@ class MapManager {
     if (this.routeLine) {
       this.map.removeLayer(this.routeLine);
     }
-    
-    this.routeLine = L.polyline(coordinates, {color: 'blue'}).addTo(this.map);
-    this.map.fitBounds(this.routeLine.getBounds());
+
+    this.routeLine = L.polyline(coordinates, {
+      color: '#1a73e8',
+      weight: 6,
+      opacity: 0.85,
+      lineJoin: 'round',
+      lineCap: 'round'
+    }).addTo(this.map);
+
+    this.map.fitBounds(this.routeLine.getBounds(), { padding: [30, 30] });
   }
 
   getMap() {
