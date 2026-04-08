@@ -407,9 +407,7 @@ class TrafficManager {
       baseTraffic = 0.35; // Weekend traffic
     }
     
-    // Add randomness for realism
-    const variance = (Math.random() - 0.5) * 0.3;
-    return Math.max(0.1, Math.min(0.9, baseTraffic + variance));
+    return baseTraffic;
   }
 
   calculateDistance(coords) {
@@ -505,7 +503,8 @@ class TrafficManager {
     
     // Apply traffic-aware styling to the route
     if (window.mapManager && window.mapManager.routeLine) {
-      const avgTrafficLevel = Math.random() * 0.6 + 0.2; // Simulate average traffic
+      // Use time-based traffic level (same function used for analysis) rather than random
+      const avgTrafficLevel = this.getSegmentTrafficLevel([]);
       const color = this.getTrafficColor(avgTrafficLevel);
       
       window.mapManager.routeLine.setStyle({

@@ -201,7 +201,9 @@ class FreeAIService {
     
     // Dynamic responses based on message content
     if (intent === 'route_planning' && entities.cities.length >= 2) {
-      return `I'll help you plan the perfect route from ${entities.cities[0]} to ${entities.cities[1]}! The journey will be approximately ${this.estimateDistance(entities.cities[0], entities.cities[1])} km. Use the search box to add these destinations.`;
+      const dist = this.estimateDistance(entities.cities[0], entities.cities[1]);
+      const distText = dist ? `approximately ${dist} km` : 'a distance you can check by adding both stops to your route';
+      return `I'll help you plan the perfect route from ${entities.cities[0]} to ${entities.cities[1]}! The journey is ${distText}. Use the search box to add these destinations.`;
     }
     
     if (intent === 'weather' && entities.cities.length > 0) {
@@ -231,14 +233,15 @@ class FreeAIService {
   }
 
   estimateDistance(city1, city2) {
+    // Small hardcoded table for instant common-pair answers; returns null for unknowns
+    // so callers can prompt the user to add stops rather than show a random number.
     const distances = {
       'theni-madurai': 70, 'madurai-theni': 70,
       'chennai-bangalore': 350, 'bangalore-chennai': 350,
       'mumbai-delhi': 1400, 'delhi-mumbai': 1400,
       'london-paris': 450, 'paris-london': 450
     };
-    
     const key = `${city1.toLowerCase()}-${city2.toLowerCase()}`;
-    return distances[key] || Math.floor(Math.random() * 500) + 100;
+    return distances[key] || null;
   }
 }

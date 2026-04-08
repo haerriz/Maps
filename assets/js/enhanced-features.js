@@ -79,16 +79,13 @@ class EnhancedFeatures {
   }
 
   async getElevation(lat, lng) {
-    if (location.protocol === 'file:') {
-      return { elevation: Math.floor(Math.random() * 1000) + 100 };
-    }
-    
     try {
+      // Open-Elevation is free, no API key, CORS-safe
       const response = await fetch(`https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lng}`);
       const data = await response.json();
       return data.results[0];
     } catch {
-      return null;
+      return null; // Show nothing rather than fake data
     }
   }
 

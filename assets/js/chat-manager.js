@@ -902,7 +902,8 @@ class ChatManager {
         case 'route_planning':
           if (entities && entities.cities && entities.cities.length >= 2) {
             const distance = await this.estimateDistance(entities.cities[0], entities.cities[1]);
-            return `Great! I can help you plan a route from ${entities.cities[0]} to ${entities.cities[1]}. This is about ${distance} km. Use the search box to add these cities and I'll optimize the route with real-time traffic!`;
+            const distText = distance ? `about ${distance} km` : 'a distance you can see once added to the map';
+            return `Great! I can help you plan a route from ${entities.cities[0]} to ${entities.cities[1]}. This is ${distText}. Use the search box to add these cities and I'll optimize the route with real-time traffic!`;
           }
           return "I'd be happy to help plan your route! Please mention both your starting point and destination.";
           
@@ -1049,21 +1050,21 @@ class ChatManager {
       console.log('Distance calculation failed:', error);
     }
     
-    // Fallback to estimated distance
-    return Math.floor(Math.random() * 300) + 100;
+    // Cannot calculate distance without coordinates — return null so caller
+    // can show a helpful message rather than a random fake number
+    return null;
   }
 
   async getCityCoordinates(city) {
     if (location.protocol === 'file:') return null;
     
     try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1`);
+      // Photon is CORS-safe, no API key, no rate limit (same OSM data as Nominatim)
+      const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(city)}&limit=1`);
       const data = await response.json();
-      if (data.length > 0) {
-        return {
-          lat: parseFloat(data[0].lat),
-          lng: parseFloat(data[0].lon)
-        };
+      if (data.features && data.features.length > 0) {
+        const [lng, lat] = data.features[0].geometry.coordinates;
+        return { lat, lng };
       }
     } catch (error) {
       console.log('Geocoding failed:', error);
