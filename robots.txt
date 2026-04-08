@@ -4,16 +4,22 @@ Allow: /
 # Sitemap
 Sitemap: https://maps.haerriz.com/sitemap.xml
 
-# Crawl-delay for respectful crawling
-Crawl-delay: 1
-
 # Block unnecessary paths
 Disallow: /assets/js/
 Disallow: /config/
-Disallow: /*.json$
 Disallow: /FIXES_SUMMARY.md
+Disallow: /README.md
+Disallow: /docs/
 
 # Allow important assets
 Allow: /assets/css/
 Allow: /assets/icons/
 Allow: /assets/images/
+Allow: /manifest.json
+
+# Crawl-delay for respectful crawling (Bing, Yandex)
+User-agent: bingbot
+Crawl-delay: 5
+
+User-agent: Yandex
+Crawl-delay: 5

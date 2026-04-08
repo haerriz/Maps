@@ -1,60 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml"
+  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <!-- Main Application -->
   <url>
     <loc>https://maps.haerriz.com/</loc>
-    <lastmod>2025-01-02</lastmod>
-    <changefreq>daily</changefreq>
+    <lastmod>2026-04-08</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://maps.haerriz.com/" />
-    <xhtml:link rel="alternate" hreflang="es" href="https://maps.haerriz.com/es/" />
-    <xhtml:link rel="alternate" hreflang="fr" href="https://maps.haerriz.com/fr/" />
-    <xhtml:link rel="alternate" hreflang="de" href="https://maps.haerriz.com/de/" />
-    <xhtml:link rel="alternate" hreflang="hi" href="https://maps.haerriz.com/hi/" />
-    <xhtml:link rel="alternate" hreflang="zh" href="https://maps.haerriz.com/zh/" />
-    <xhtml:link rel="alternate" hreflang="ja" href="https://maps.haerriz.com/ja/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://maps.haerriz.com/" />
+    <image:image>
+      <image:loc>https://maps.haerriz.com/assets/images/og-image.jpg</image:loc>
+      <image:caption>Haerriz Maps — Free route planner and online maps</image:caption>
+      <image:title>Haerriz Maps</image:title>
+    </image:image>
   </url>
-  
-  <!-- Existing Pages -->
+
+  <!-- About -->
   <url>
-    <loc>https://maps.haerriz.com/about.html</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://maps.haerriz.com/about</loc>
+    <lastmod>2026-04-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- Features -->
   <url>
-    <loc>https://maps.haerriz.com/features.html</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://maps.haerriz.com/features</loc>
+    <lastmod>2026-04-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Help & FAQ -->
+  <url>
+    <loc>https://maps.haerriz.com/help</loc>
+    <lastmod>2026-04-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- API Docs -->
   <url>
-    <loc>https://maps.haerriz.com/help.html</loc>
-    <lastmod>2025-01-02</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://maps.haerriz.com/api.html</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://maps.haerriz.com/api</loc>
+    <lastmod>2026-04-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
+
+  <!-- Blog -->
   <url>
-    <loc>https://maps.haerriz.com/blog.html</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://maps.haerriz.com/blog</loc>
+    <lastmod>2026-04-08</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
   </url>
+
+  <!-- Privacy -->
   <url>
-    <loc>https://maps.haerriz.com/privacy.html</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://maps.haerriz.com/privacy</loc>
+    <lastmod>2026-04-08</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
+
+  <!-- Terms -->
   <url>
-    <loc>https://maps.haerriz.com/terms.html</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://maps.haerriz.com/terms</loc>
+    <lastmod>2026-04-08</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>

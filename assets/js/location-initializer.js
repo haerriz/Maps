@@ -89,6 +89,19 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Set default location (Chennai, India)
   CONFIG.DEFAULT_CENTER = [13.0827, 80.2707];
 
+  // Handle ?s= search query (WebSite SearchAction for Google Sitelinks Searchbox)
+  const searchParam = new URLSearchParams(window.location.search).get('s');
+  if (searchParam) {
+    const input = document.getElementById('startLocation');
+    if (input) {
+      input.value = decodeURIComponent(searchParam);
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          if (window.searchManager) window.searchManager.performSearch(decodeURIComponent(searchParam));
+        }, 2000);
+      });
+    }
+  }
 });
 
 // Export for use in other modules
