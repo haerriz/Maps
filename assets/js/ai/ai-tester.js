@@ -337,16 +337,14 @@ class AITester {
   }
 }
 
-// Auto-run tests when page loads
+// Tests are NOT auto-run on page load — they fire HuggingFace (CORS) and Nominatim
+// requests that cause 429 rate-limit errors and break normal search.
+// Run manually in the browser console: window.aiTester.runAllTests()
 window.addEventListener('DOMContentLoaded', () => {
-  // Wait for AI Manager to initialize
-  setTimeout(async () => {
+  setTimeout(() => {
     if (window.aiManager) {
-      const tester = new AITester();
-      await tester.runAllTests();
-      
-      // Store tester globally for manual testing
-      window.aiTester = tester;
+      window.aiTester = new AITester();
+      // Do NOT call runAllTests() automatically
     }
   }, 2000);
 });

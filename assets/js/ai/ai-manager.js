@@ -48,8 +48,9 @@ class AIManager {
   async extractEntities(message) {
     const results = await Promise.allSettled([
       this.services.geocoding.extractCities(message),
-      this.services.nlp.extractEntities(message),
-      this.services.huggingface.extractEntities(message)
+      this.services.nlp.extractEntities(message)
+      // HuggingFace extractEntities removed: the Inference API blocks CORS from browsers,
+      // causing ERR_FAILED on every call. NLP + geocoding cover entity extraction.
     ]);
 
     // Combine results from all services

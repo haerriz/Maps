@@ -43,20 +43,25 @@ class Utils {
     };
   }
   
-  // Geocoding using free Nominatim API
+  // Geocoding using Photon (CORS-safe, no rate limit, OpenStreetMap data)
   static async geocodeLocation(query) {
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`
+        `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`
       );
       const data = await response.json();
-      return data.map(item => ({
-        name: item.display_name,
-        lat: parseFloat(item.lat),
-        lng: parseFloat(item.lon),
-        type: item.type,
-        importance: item.importance
-      }));
+      if (!data || !data.features || data.features.length === 0) return [];
+      return data.features.map(f => {
+        const p = f.properties;
+        const nameParts = [p.name, p.city, p.state, p.country].filter(Boolean);
+        return {
+          name: nameParts.join(', '),
+          lat: f.geometry.coordinates[1],
+          lng: f.geometry.coordinates[0],
+          type: p.osm_value || p.type || 'place',
+          importance: p.extent ? 1 : 0.5
+        };
+      });
     } catch (error) {
       console.warn('Geocoding API unavailable');
       return [];
