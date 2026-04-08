@@ -263,13 +263,19 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 // UI Section Toggle Functionality
 function toggleSection(sectionId) {
+  // The id is on the section-content element; the card is its parent
   const section = document.getElementById(sectionId);
+  if (!section) return;
   const card = section.closest('.section-card');
-  
-  if (card.classList.contains('expanded')) {
+  if (!card) return;
+
+  const isExpanded = card.classList.contains('expanded');
+  if (isExpanded) {
     card.classList.remove('expanded');
+    section.style.display = 'none';
   } else {
     card.classList.add('expanded');
+    section.style.display = 'block';
   }
 }
 

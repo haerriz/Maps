@@ -17,17 +17,9 @@ class GeocodingService {
     const patternCities = this.extractCitiesWithPatterns(message);
     cities.push(...patternCities);
 
-    // Then try API-based validation for remaining words
-    const words = message.toLowerCase().split(/\s+/);
-    for (const word of words) {
-      const cleanWord = word.replace(/[^a-z]/g, '');
-      if (cleanWord.length > 2 && !cities.includes(cleanWord)) {
-        const cityData = await this.checkIfCity(cleanWord);
-        if (cityData) {
-          cities.push(cityData.name);
-        }
-      }
-    }
+    // Skip per-word Nominatim API calls — they fire N simultaneous requests and
+    // immediately hit the 1 req/sec rate limit, causing 429 errors that appear
+    // as CORS errors. Pattern-based extraction above covers all common cities.
 
     // Check for multi-word city names
     const multiWordCities = await this.extractMultiWordCities(message);

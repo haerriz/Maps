@@ -122,9 +122,7 @@ function searchAndAddStop() {
     Utils.geocodeLocation(query).then(results => {
       if (results.length > 0) {
         const result = results[0];
-        if (window.tourManager) {
-          window.tourManager.addStop(result);
-        }
+        // addMarker internally calls tourManager.addStop() — do not call it separately
         if (window.mapManager) {
           window.mapManager.addMarker(result);
         }

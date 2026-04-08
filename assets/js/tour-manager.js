@@ -304,14 +304,11 @@ function setStartTime(time) {
 }
 
 function getWeatherInfo() {
-  if (window.tourManager && window.tourManager.stops.length > 0) {
-    const stops = window.tourManager.getStops();
-    const lastStop = stops[stops.length - 1];
-    Utils.getWeather(`${lastStop.lat},${lastStop.lng}`).then(weather => {
-      if (weather) {
-        alert(`Weather: ${weather.condition}, ${weather.temperature}°C`);
-      }
-    });
+  // Delegate to WeatherManager which handles the actual API calls
+  if (window.weatherManager) {
+    window.weatherManager.getWeatherInfo();
+  } else if (window.chatManager) {
+    window.chatManager.addMessage('Weather feature is loading, please try again in a moment.', 'ai');
   }
 }
 
