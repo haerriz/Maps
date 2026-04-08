@@ -1,41 +1,45 @@
-// Application Configuration - Free APIs Only
+// Application Configuration - Free APIs Only (no API keys required)
 const CONFIG = {
-  // Map Configuration
+  // ── Map Tiles (OpenStreetMap) ─────────────────────────────────
   MAP_PROVIDER: 'OpenStreetMap',
   MAP_TILES: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  MAP_ATTRIBUTION: '© OpenStreetMap contributors',
-  
-  // Routing Service (Free)
-  ROUTING_SERVICE: 'OSRM',
-  ROUTING_URL: 'https://router.project-osrm.org/route/v1',
-  
-  // Geocoding Service (Free)
-  GEOCODING_SERVICE: 'Nominatim',
-  GEOCODING_URL: 'https://nominatim.openstreetmap.org/search',
-  
-  // Weather Service (Free - No API Key Required)
-  WEATHER_SERVICE: 'wttr.in',
-  WEATHER_URL: 'https://wttr.in',
-  
-  // Currency Exchange (Free - No API Key Required)
-  CURRENCY_SERVICE: 'fxratesapi',
-  CURRENCY_URL: 'https://api.fxratesapi.com/latest',
-  
-  // Location Service (Free - No API Key Required)
-  LOCATION_SERVICE: 'ipapi',
-  LOCATION_URL: 'https://ipapi.co/json',
-  
-  // Traffic Data (Free via OpenStreetMap)
-  TRAFFIC_SERVICE: 'overpass',
-  TRAFFIC_URL: 'https://overpass-api.de/api/interpreter',
-  
-  // Default Settings
+  MAP_ATTRIBUTION: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+
+  // ── Routing engines (OSRM primary, ORS optional with key) ────
+  // OSRM public demo: free, keyless, supports driving / cycling / foot
+  OSRM_URL: 'https://router.project-osrm.org/route/v1',
+  // OpenRouteService: free key from openrouteservice.org (optional)
+  // Set ORS_KEY to enable ORS as the active engine; leave empty to use OSRM.
+  ORS_KEY: '',
+  ORS_URL: 'https://api.openrouteservice.org/v2/directions',
+
+  // ── Geocoding ─────────────────────────────────────────────────
+  // Photon: CORS-safe, keyless, no rate limit, same OSM data
+  PHOTON_URL: 'https://photon.komoot.io/api',
+  // Nominatim: used only for REVERSE geocoding (stop name lookup)
+  NOMINATIM_URL: 'https://nominatim.openstreetmap.org',
+
+  // ── POI / Nearby Places (Overpass API) ───────────────────────
+  OVERPASS_ENDPOINTS: [
+    'https://overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter'
+  ],
+
+  // ── Attractions (OpenTripMap-equivalent via Overpass tourism=*) ─
+  // Uses free Overpass API with tourism=* tags — no key required
+
+  // ── Weather (Open-Meteo) ─────────────────────────────────────
+  WEATHER_URL: 'https://api.open-meteo.com/v1/forecast',
+
+  // ── Elevation (Open-Elevation) ────────────────────────────────
+  ELEVATION_URL: 'https://api.open-elevation.com/api/v1/lookup',
+
+  // ── Map defaults ─────────────────────────────────────────────
   DEFAULT_ZOOM: 13,
-  DEFAULT_CENTER: null, // Will be set dynamically based on user location
-  MAX_ZOOM: 18,
+  DEFAULT_CENTER: null, // set dynamically from browser geolocation
+  MAX_ZOOM: 19,
   MIN_ZOOM: 2,
-  
-  // Initialize user location
+
   async initializeLocation() {
     try {
       const userLocation = await Utils.getUserLocation();
@@ -43,35 +47,25 @@ const CONFIG = {
         this.DEFAULT_CENTER = [userLocation.lat, userLocation.lng];
         return this.DEFAULT_CENTER;
       }
-    } catch (error) {
-      console.warn('Could not get user location, using fallback');
-    }
-    // Fallback to London if location detection fails
-    this.DEFAULT_CENTER = [51.505, -0.09];
+    } catch (e) { /* ignore */ }
+    this.DEFAULT_CENTER = [13.0827, 80.2707]; // Chennai fallback
     return this.DEFAULT_CENTER;
   },
-  
-  // Rate Limiting
-  RATE_LIMIT: {
-    GEOCODING: 1000, // requests per hour
-    ROUTING: 5000,   // requests per hour
-    WEATHER: 1000,   // requests per hour
-  },
-  
-  // Supported Languages
-  LANGUAGES: ['en', 'es', 'fr', 'de', 'hi', 'zh', 'ja'],
-  
-  // Transport Modes
+
+  // ── Transport modes → OSRM profile mapping ───────────────────
   TRANSPORT_MODES: {
-    driving: { icon: '🚗', osrm: 'driving' },
-    walking: { icon: '🚶', osrm: 'foot' },
-    cycling: { icon: '🚴', osrm: 'bike' },
-    transit: { icon: '🚌', osrm: 'driving' }, // Fallback to driving
-    mixed: { icon: '🔄', osrm: 'driving' }
+    driving:  { icon: '🚗', label: 'Driving',  osrm: 'driving',  ors: 'driving-car' },
+    walking:  { icon: '🚶', label: 'Walking',  osrm: 'foot',     ors: 'foot-walking' },
+    cycling:  { icon: '🚴', label: 'Cycling',  osrm: 'bike',     ors: 'cycling-regular' },
+    transit:  { icon: '🚌', label: 'Transit',  osrm: 'driving',  ors: 'driving-car' }
+  },
+
+  // Active routing engine: 'osrm' or 'ors' (auto-selected based on ORS_KEY)
+  get ACTIVE_ROUTER() {
+    return this.ORS_KEY ? 'ors' : 'osrm';
   }
 };
 
-// Export for use in modules
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = CONFIG;
 } else {

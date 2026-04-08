@@ -124,6 +124,10 @@ body {
 }
 
 /* Nearby places */
+.nearby-tab { background: var(--bg-secondary); border-color: var(--border-color); color: var(--text-primary); }
+.nearby-tab:hover { background: var(--bg-tertiary); }
+.nearby-tab.active { background: #4285f4; color: #fff; border-color: #4285f4; }
+
 .nearby-places {
   background-color: var(--bg-secondary);
   border-color: var(--border-color);

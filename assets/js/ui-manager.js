@@ -89,18 +89,17 @@ class UIManager {
   handleTravelModeChange() {
     const mode = document.getElementById('travelMode')?.value;
     console.log('Travel mode changed to:', mode);
-    
+
     // Update route type display
     const routeType = document.getElementById('routeType');
     if (routeType) {
-      const modeNames = {
-        driving: 'Driving',
-        walking: 'Walking',
-        cycling: 'Cycling',
-        transit: 'Transit',
-        mixed: 'Mixed'
-      };
+      const modeNames = { driving: 'Driving', walking: 'Walking', cycling: 'Cycling', transit: 'Transit' };
       routeType.textContent = modeNames[mode] || 'Direct';
+    }
+
+    // Recalculate existing route with new profile (OSRM/ORS use different endpoints per mode)
+    if (window.tourManager && window.tourManager.stops.length >= 2) {
+      window.tourManager.calculateRoute();
     }
   }
 

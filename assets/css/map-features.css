@@ -139,6 +139,29 @@
   font-size: 16px;
 }
 
+.nearby-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.nearby-tab {
+  flex: 1;
+  padding: 6px 4px;
+  font-size: 11px;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  background: #f8f9fa;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nearby-tab:hover { background: #e8f0fe; border-color: #4285f4; }
+.nearby-tab.active { background: #4285f4; color: #fff; border-color: #4285f4; }
+
 .nearby-places {
   max-height: 200px;
   overflow-y: auto;

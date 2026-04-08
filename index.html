@@ -457,11 +457,16 @@
               <span class="material-icons expand-icon">expand_more</span>
             </div>
             <div class="section-content" id="nearby">
+              <div class="nearby-tabs">
+                <button class="nearby-tab active" onclick="window.nearbyPlacesManager.loadNearbyPlaces('amenities'); document.querySelectorAll('.nearby-tab').forEach(t=>t.classList.remove('active')); this.classList.add('active')">🍽 Amenities</button>
+                <button class="nearby-tab" onclick="window.nearbyPlacesManager.loadNearbyPlaces('attractions'); document.querySelectorAll('.nearby-tab').forEach(t=>t.classList.remove('active')); this.classList.add('active')">🏛 Attractions</button>
+                <button class="nearby-tab" onclick="window.nearbyPlacesManager.loadNearbyPlaces('transit'); document.querySelectorAll('.nearby-tab').forEach(t=>t.classList.remove('active')); this.classList.add('active')">🚌 Transit</button>
+              </div>
               <div class="nearby-status">
-                <span id="nearbyStatus">Auto-updating nearby places...</span>
+                <span id="nearbyStatus">Select a category above...</span>
               </div>
               <div id="nearbyPlaces" class="nearby-places">
-                <p class="nearby-hint">Discovering places around your location...</p>
+                <p class="nearby-hint">Tap a category to discover nearby places via OpenStreetMap.</p>
               </div>
             </div>
           </div>
@@ -609,7 +614,7 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   
   <!-- Application Configuration -->
-  <script src="config/app.config.js"></script>
+  <script src="config/app.config.js?v=2026040804"></script>
   
   <!-- Modular Application Scripts with cache busting -->
   <script src="assets/js/utils.js?v=2026040801"></script>
@@ -617,10 +622,10 @@
   <script src="assets/js/map-manager.js?v=2025010223"></script>
   <script src="assets/js/location-manager.js?v=2025010214"></script>
   <script src="assets/js/nearby-places.js?v=2026040803"></script>
-  <script src="assets/js/route-calculator.js?v=2025010202"></script>
+  <script src="assets/js/route-calculator.js?v=2026040804"></script>
   <script src="assets/js/map-3d.js?v=2025010212"></script>
   <script src="assets/js/navigation-manager.js?v=2025010202"></script>
-  <script src="assets/js/tour-manager.js?v=2025010202"></script>
+  <script src="assets/js/tour-manager.js?v=2026040804"></script>
   <!-- AI Services -->
   <script src="assets/js/ai/geocoding-service.js?v=2026040801"></script>
   <script src="assets/js/ai/nlp-service.js?v=2026040801"></script>
@@ -650,7 +655,7 @@
   <script src="assets/js/search-manager.js?v=2026040801"></script>
   <script src="assets/js/traffic-manager.js?v=2026040802"></script>
   <script src="assets/js/weather-manager.js?v=2026040803"></script>
-  <script src="assets/js/ui-manager.js?v=2025010202"></script>
+  <script src="assets/js/ui-manager.js?v=2026040804"></script>
   <script src="assets/js/chat-functions.js?v=2025010202"></script>
   <script src="assets/js/theme-manager.js?v=2025010216"></script>
   <script src="assets/js/enhanced-features.js?v=2026040802"></script>

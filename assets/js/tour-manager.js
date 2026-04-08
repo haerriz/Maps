@@ -31,31 +31,40 @@ class TourManager {
   }
 
   async generateStopName(latlng) {
-    // If it's user location, keep that name
     if (latlng.name === 'My Location') return 'My Location';
-    
-    // Try reverse geocoding for real location name
+
+    // 1. Nominatim reverse geocode (works from browsers; reverse-geocode is CORS-safe)
     try {
-      const response = await fetch(
+      const res = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}&zoom=18&addressdetails=1`
       );
-      const data = await response.json();
-      
-      if (data && data.display_name) {
-        // Extract meaningful location name
-        const address = data.address || {};
-        const name = address.amenity || address.shop || address.building ||
-                    (address.house_number && address.road
-                      ? `${address.house_number} ${address.road}`
-                      : address.road || address.suburb || address.city ||
-                        data.display_name.split(',')[0]);
-        return name || (this.stops.length === 0 ? 'Starting Point' : `Stop ${this.stops.length + 1}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.address) {
+          const a = data.address;
+          const name = a.amenity || a.shop || a.building ||
+                       (a.house_number && a.road ? `${a.house_number} ${a.road}` : null) ||
+                       a.road || a.suburb || a.city || data.display_name.split(',')[0];
+          if (name) return name;
+        }
       }
-    } catch (error) {
-      console.warn('Reverse geocoding failed:', error);
-    }
-    
-    // Fallback to generic names
+    } catch (e) { console.warn('Nominatim reverse geocode failed:', e); }
+
+    // 2. Photon reverse geocode as fallback
+    try {
+      const res = await fetch(
+        `https://photon.komoot.io/reverse?lat=${latlng.lat}&lon=${latlng.lng}&limit=1`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data.features && data.features.length > 0) {
+          const p = data.features[0].properties;
+          const name = p.name || p.street || p.city || p.country;
+          if (name) return name;
+        }
+      }
+    } catch (e) { console.warn('Photon reverse geocode failed:', e); }
+
     return this.stops.length === 0 ? 'Starting Point' : `Stop ${this.stops.length + 1}`;
   }
 
