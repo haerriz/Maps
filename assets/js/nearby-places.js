@@ -84,10 +84,11 @@ class NearbyPlacesManager {
     this.lastApiCall = Date.now();
     
     try {
-      // Use Nominatim directly (more reliable than Overpass)
+      // Use Overpass API: the correct free tool for proximity amenity search
+      // Nominatim /search does not support lat/lon/radius amenity queries
       return await this.fetchNominatimNearby(lat, lng);
     } catch (error) {
-      console.warn('Nominatim failed, using fallback places:', error);
+      console.warn('Overpass nearby fetch failed, using fallback:', error);
       return this.generateFallbackPlaces(lat, lng);
     }
   }
@@ -108,38 +109,32 @@ class NearbyPlacesManager {
   }
 
   async fetchNominatimNearby(lat, lng) {
-    const amenities = ['restaurant', 'cafe', 'hospital', 'bank', 'fuel', 'pharmacy', 'hotel', 'supermarket'];
-    const allPlaces = [];
-    
-    for (const amenity of amenities.slice(0, 4)) { // Limit to 4 types to avoid rate limits
-      try {
-        const radius = 0.005; // ~500m radius
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&amenity=${amenity}&lat=${lat}&lon=${lng}&radius=1000&limit=3&addressdetails=1`
-        );
-        
-        if (response.ok) {
-          const data = await response.json();
-          const places = data.map(place => ({
-            lat: parseFloat(place.lat),
-            lon: parseFloat(place.lon),
-            tags: {
-              name: place.name || place.display_name.split(',')[0],
-              amenity: amenity,
-              'addr:street': place.address?.road || place.display_name.split(',')[1]?.trim()
-            }
-          }));
-          allPlaces.push(...places);
-        }
-        
-        // Small delay to respect rate limits
-        await new Promise(resolve => setTimeout(resolve, 200));
-      } catch (error) {
-        console.warn(`Failed to fetch ${amenity}:`, error);
-      }
-    }
-    
-    return allPlaces.slice(0, 8);
+    // Nominatim /search cannot do proximity amenity queries — use Overpass API instead.
+    // Overpass is completely free, no API key required, and natively supports
+    // "find amenity X within N metres of a coordinate" via the around: filter.
+    const amenities = ['restaurant', 'cafe', 'hospital', 'bank'];
+    const nodeFilters = amenities
+      .map(a => `node["amenity"="${a}"](around:1000,${lat},${lng});`)
+      .join('\n');
+    const query = `[out:json][timeout:10];\n(\n${nodeFilters}\n);\nout center 12;`;
+
+    const response = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `data=${encodeURIComponent(query)}`
+    });
+
+    if (!response.ok) throw new Error(`Overpass ${response.status}`);
+
+    const data = await response.json();
+    return (data.elements || [])
+      .map(el => ({
+        lat: el.lat ?? el.center?.lat,
+        lon: el.lon ?? el.center?.lon,
+        tags: el.tags || {}
+      }))
+      .filter(p => p.lat != null && p.lon != null)
+      .slice(0, 8);
   }
 
   displayNearbyPlaces(places) {

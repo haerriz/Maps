@@ -795,23 +795,15 @@ class ChatManager {
       time_terms: []
     };
     
-    // Use Nominatim API to detect cities (free, no key)
+    // Detect cities using the local known-cities list only.
+    // Calling Nominatim once per word was firing N simultaneous requests per message,
+    // instantly hitting the 1 req/sec rate limit which returns 429 — and 429 responses
+    // lack CORS headers, so the browser incorrectly reports them as CORS errors.
     const words = message.toLowerCase().split(/\s+/);
-    
     for (const word of words) {
       const cleanWord = word.replace(/[^a-z]/g, '');
-      if (cleanWord.length > 2) {
-        try {
-          const cityData = await this.checkIfCity(cleanWord);
-          if (cityData) {
-            entities.cities.push(cityData.display_name.split(',')[0]);
-          }
-        } catch (error) {
-          // Fallback to basic pattern matching
-          if (this.isLikelyCity(cleanWord)) {
-            entities.cities.push(cleanWord.charAt(0).toUpperCase() + cleanWord.slice(1));
-          }
-        }
+      if (cleanWord.length > 2 && this.isLikelyCity(cleanWord)) {
+        entities.cities.push(cleanWord.charAt(0).toUpperCase() + cleanWord.slice(1));
       }
     }
     
@@ -844,8 +836,24 @@ class ChatManager {
   }
 
   isLikelyCity(word) {
-    // Basic heuristics for city names
-    const commonCities = ['mumbai', 'delhi', 'bangalore', 'chennai', 'kolkata', 'hyderabad', 'pune', 'jaipur', 'madurai', 'theni', 'coimbatore', 'kochi', 'mysore'];
+    // All cities referenced anywhere in the app — expanded to replace per-word Nominatim lookups
+    const commonCities = [
+      // India - Tamil Nadu
+      'madurai', 'theni', 'coimbatore', 'chennai', 'kodaikanal', 'ooty', 'kochi',
+      'mysore', 'munnar', 'pondicherry', 'vellore', 'tiruchirappalli', 'trichy',
+      'tirunelveli', 'nagercoil', 'rameshwaram', 'thanjavur', 'kumbakonam',
+      // India - other states
+      'mumbai', 'delhi', 'bangalore', 'kolkata', 'hyderabad', 'pune', 'jaipur',
+      'ahmedabad', 'surat', 'lucknow', 'kanpur', 'nagpur', 'indore', 'bhopal',
+      'visakhapatnam', 'patna', 'vadodara', 'ghaziabad', 'ludhiana', 'agra',
+      'amritsar', 'varanasi', 'rishikesh', 'shimla', 'darjeeling', 'goa',
+      'guwahati', 'chandigarh', 'meerut', 'rajkot', 'kota',
+      // International
+      'london', 'paris', 'tokyo', 'beijing', 'newyork', 'berlin', 'rome',
+      'madrid', 'amsterdam', 'dubai', 'singapore', 'sydney', 'toronto',
+      'manchester', 'lambeth', 'osaka', 'seoul', 'bangkok', 'istanbul',
+      'moscow', 'cairo', 'lagos', 'nairobi', 'johannesburg', 'casablanca'
+    ];
     return commonCities.includes(word);
   }
 
