@@ -140,21 +140,22 @@ class APITester {
     console.log('🗺️ Testing Geocoding APIs...');
     
     try {
-      const response = await fetch('https://nominatim.openstreetmap.org/search?q=Mumbai&format=json&limit=1');
+      // Photon is CORS-safe, no rate limit, same OSM data
+      const response = await fetch('https://photon.komoot.io/api/?q=Mumbai&limit=1');
       
       if (response.ok) {
         const data = await response.json();
-        if (data.length > 0) {
-          console.log('✅ Nominatim API:', data[0].display_name);
-          this.results.nominatim = { status: 'success', location: data[0].display_name };
+        if (data.features && data.features.length > 0) {
+          console.log('✅ Photon API:', data.features[0].properties.name);
+          this.results.geocoding = { status: 'success', location: data.features[0].properties.name };
         }
       } else {
-        console.log('❌ Nominatim Failed:', response.status);
-        this.results.nominatim = { status: 'failed', code: response.status };
+        console.log('❌ Photon Failed:', response.status);
+        this.results.geocoding = { status: 'failed', code: response.status };
       }
     } catch (error) {
-      console.log('❌ Nominatim Error:', error);
-      this.results.nominatim = { status: 'error', error: error.message };
+      console.log('❌ Photon Error:', error);
+      this.results.geocoding = { status: 'error', error: error.message };
     }
   }
 
@@ -240,18 +241,10 @@ window.testHF = async function() {
   return tester.results;
 };
 
-// Auto-test on load
+// Auto-test disabled: fires HuggingFace (CORS-blocked) and wttr.in calls that pollute
+// the console and cause false CORS errors on every page load.
+// Run manually: window.testAPIs() or window.testAI()
 window.addEventListener('DOMContentLoaded', () => {
-  setTimeout(async () => {
-    console.log('🚀 Auto-testing APIs...');
-    const report = await window.testAPIs();
-    
-    // Apply recommendations
-    if (report.recommendations.includes('HuggingFace API not working')) {
-      console.log('⚠️ HuggingFace not working - switching to local AI');
-      // Switch to local processing
-    }
-    
-    window.apiTestReport = report;
-  }, 2000);
+  // Tester available but NOT auto-run
+  window.apiTester = null;
 });

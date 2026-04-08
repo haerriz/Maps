@@ -22,32 +22,18 @@ class WeatherManager {
     }
     
     try {
-      const weatherPromises = tourStops.slice(0, 5).map(async (stop, index) => {
-        try {
-          // Using wttr.in weather service as fallback
-          const wttrResponse = await fetch(`https://wttr.in/${stop.lat},${stop.lng}?format=j1`);
-          if (wttrResponse.ok) {
-            const wttrData = await wttrResponse.json();
-            const current = wttrData.current_condition[0];
-            return {
-              location: stop.name,
-              temp: `${current.temp_C}°C`,
-              description: current.weatherDesc[0].value,
-              humidity: `${current.humidity}%`,
-              windSpeed: `${current.windspeedKmph} km/h`,
-              icon: this.getWeatherIcon(current.weatherCode)
-            };
-          }
-          
-          // Final fallback - real geographic weather estimation
-          return await this.getRealWeatherFallback(stop);
-        } catch (error) {
-          return await this.getRealWeatherFallback(stop);
-        }
+      const weatherPromises = tourStops.slice(0, 5).map(async (stop) => {
+        return await this.fetchOpenMeteoWeather(stop.lat, stop.lng, stop.name);
       });
       
-      const weatherData = await Promise.all(weatherPromises);
-      this.displayWeatherInfo(weatherData);
+      const weatherData = (await Promise.all(weatherPromises)).filter(Boolean);
+      if (weatherData.length > 0) {
+        this.displayWeatherInfo(weatherData);
+      } else {
+        if (window.chatManager) {
+          window.chatManager.addMessage('Unable to fetch weather data right now. Please try again shortly.', 'ai');
+        }
+      }
       
     } catch (error) {
       if (window.chatManager) {
@@ -56,69 +42,91 @@ class WeatherManager {
     }
   }
 
-  async getSpecificLocationWeather(locationName) {
+  // Fetch weather using Open-Meteo — completely free, no API key, CORS-safe, unlimited
+  async fetchOpenMeteoWeather(lat, lng, locationName) {
     try {
-      const response = await fetch(`https://wttr.in/${encodeURIComponent(locationName)}?format=j1`);
-      if (response.ok) {
-        const data = await response.json();
-        const current = data.current_condition[0];
-        const weather = {
-          location: locationName,
-          temp: `${current.temp_C}°C`,
-          description: current.weatherDesc[0].value,
-          humidity: `${current.humidity}%`,
-          windSpeed: `${current.windspeedKmph} km/h`,
-          icon: this.getWeatherIcon(current.weatherCode)
-        };
-        
-        this.displayWeatherInfo([weather]);
-      } else {
-        const realWeather = await this.getRealWeatherFallback({ name: locationName, lat: 0, lng: 0 });
-        this.displayWeatherInfo([realWeather]);
-      }
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}` +
+        `&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code` +
+        `&wind_speed_unit=kmh&timezone=auto`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Open-Meteo ${response.status}`);
+      const data = await response.json();
+      const c = data.current;
+      return {
+        location: locationName,
+        temp: `${Math.round(c.temperature_2m)}°C`,
+        description: this.wmoCodeToDescription(c.weather_code),
+        humidity: `${c.relative_humidity_2m}%`,
+        windSpeed: `${Math.round(c.wind_speed_10m)} km/h`,
+        icon: this.wmoCodeToIcon(c.weather_code)
+      };
     } catch (error) {
-      const realWeather = await this.getRealWeatherFallback({ name: locationName, lat: 0, lng: 0 });
-      this.displayWeatherInfo([realWeather]);
+      console.warn('Open-Meteo failed for', locationName, error);
+      // Try weather.gov as fallback for US locations
+      return await this.fetchWeatherGovFallback(lat, lng, locationName);
     }
   }
 
-  async getRealWeatherFallback(stop) {
+  // WMO Weather Code mappings (used by Open-Meteo)
+  wmoCodeToDescription(code) {
+    const codes = {
+      0:'Clear sky', 1:'Mainly clear', 2:'Partly cloudy', 3:'Overcast',
+      45:'Fog', 48:'Icy fog',
+      51:'Light drizzle', 53:'Moderate drizzle', 55:'Dense drizzle',
+      61:'Slight rain', 63:'Moderate rain', 65:'Heavy rain',
+      71:'Slight snow', 73:'Moderate snow', 75:'Heavy snow', 77:'Snow grains',
+      80:'Slight showers', 81:'Moderate showers', 82:'Violent showers',
+      85:'Slight snow showers', 86:'Heavy snow showers',
+      95:'Thunderstorm', 96:'Thunderstorm with hail', 99:'Thunderstorm with heavy hail'
+    };
+    return codes[code] || 'Unknown';
+  }
+
+  wmoCodeToIcon(code) {
+    if (code === 0 || code === 1) return '☀️';
+    if (code === 2) return '⛅';
+    if (code === 3) return '☁️';
+    if (code === 45 || code === 48) return '🌫️';
+    if (code >= 51 && code <= 55) return '🌦️';
+    if (code >= 61 && code <= 65) return '🌧️';
+    if (code >= 71 && code <= 77) return '❄️';
+    if (code >= 80 && code <= 82) return '🌧️';
+    if (code >= 85 && code <= 86) return '🌨️';
+    if (code >= 95) return '⛈️';
+    return '🌤️';
+  }
+
+  async getSpecificLocationWeather(locationName) {
+    // Geocode the name to coordinates first, then use Open-Meteo
     try {
-      // Try OpenWeatherMap free tier (no key needed for some endpoints)
-      const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${stop.latlng?.lat || stop.lat}&lon=${stop.latlng?.lng || stop.lng}&units=metric`);
-      
-      if (response.ok) {
-        const data = await response.json();
-        return {
-          location: stop.name,
-          temp: `${Math.round(data.main.temp)}°C`,
-          description: data.weather[0].description,
-          humidity: `${data.main.humidity}%`,
-          windSpeed: `${Math.round(data.wind.speed * 3.6)} km/h`,
-          icon: this.getWeatherIcon(data.weather[0].id)
-        };
+      const geo = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(locationName)}&limit=1`);
+      if (geo.ok) {
+        const geoData = await geo.json();
+        if (geoData.features && geoData.features.length > 0) {
+          const [lng, lat] = geoData.features[0].geometry.coordinates;
+          const weather = await this.fetchOpenMeteoWeather(lat, lng, locationName);
+          if (weather) { this.displayWeatherInfo([weather]); return; }
+        }
       }
-    } catch (error) {
-      console.warn('OpenWeatherMap failed, trying weather.gov:', error);
+    } catch (e) { console.warn('Weather geocode failed:', e); }
+    if (window.chatManager) {
+      window.chatManager.addMessage(`Could not fetch weather for ${locationName}. Try adding it as a map stop first.`, 'ai');
     }
-    
+  }
+
+  async fetchWeatherGovFallback(lat, lng, locationName) {
     try {
-      // Try weather.gov for US locations (completely free)
-      const lat = stop.latlng?.lat || stop.lat;
-      const lng = stop.latlng?.lng || stop.lng;
-      
+      // weather.gov only covers US locations (roughly)
       if (lat >= 20 && lat <= 50 && lng >= -180 && lng <= -60) {
         const pointResponse = await fetch(`https://api.weather.gov/points/${lat},${lng}`);
         if (pointResponse.ok) {
           const pointData = await pointResponse.json();
           const forecastResponse = await fetch(pointData.properties.forecast);
-          
           if (forecastResponse.ok) {
             const forecastData = await forecastResponse.json();
             const current = forecastData.properties.periods[0];
-            
             return {
-              location: stop.name,
+              location: locationName,
               temp: `${current.temperature}°${current.temperatureUnit}`,
               description: current.shortForecast,
               humidity: 'N/A',
@@ -129,82 +137,9 @@ class WeatherManager {
         }
       }
     } catch (error) {
-      console.warn('Weather.gov failed, using geographic estimation:', error);
+      console.warn('Weather.gov fallback failed:', error);
     }
-    
-    // Final fallback: geographic weather estimation
-    return this.getGeographicWeatherEstimate(stop);
-  }
-
-  getGeographicWeatherEstimate(stop) {
-    const lat = stop.latlng?.lat || stop.lat || 0;
-    const lng = stop.latlng?.lng || stop.lng || 0;
-    const now = new Date();
-    const month = now.getMonth(); // 0-11
-    const hour = now.getHours();
-    
-    // Temperature estimation based on latitude and season
-    let baseTemp = 20; // Default moderate temperature
-    
-    // Latitude effect (closer to equator = warmer)
-    const latEffect = Math.abs(lat);
-    if (latEffect < 23.5) { // Tropics
-      baseTemp = 28;
-    } else if (latEffect < 40) { // Temperate
-      baseTemp = 22;
-    } else if (latEffect < 60) { // Cold temperate
-      baseTemp = 15;
-    } else { // Polar
-      baseTemp = 5;
-    }
-    
-    // Seasonal adjustment (Northern hemisphere)
-    const seasonalAdjustment = lat >= 0 ? 
-      Math.sin((month - 2) * Math.PI / 6) * 10 : // Northern hemisphere
-      Math.sin((month - 8) * Math.PI / 6) * 10;   // Southern hemisphere
-    
-    baseTemp += seasonalAdjustment;
-    
-    // Daily temperature variation
-    const dailyVariation = Math.sin((hour - 6) * Math.PI / 12) * 5;
-    const finalTemp = Math.round(baseTemp + dailyVariation);
-    
-    // Weather condition based on geographic factors
-    const conditions = this.getGeographicConditions(lat, lng, month);
-    
-    return {
-      location: stop.name,
-      temp: `${finalTemp}°C`,
-      description: conditions.desc,
-      humidity: `${Math.round(50 + Math.abs(lat) / 2)}%`, // Higher humidity near equator
-      windSpeed: `${Math.round(10 + Math.abs(lat) / 10)} km/h`,
-      icon: conditions.icon
-    };
-  }
-
-  getGeographicConditions(lat, lng, month) {
-    const absLat = Math.abs(lat);
-    
-    // Tropical regions (more rain)
-    if (absLat < 23.5) {
-      const isRainySeason = (lat >= 0 && month >= 5 && month <= 9) || 
-                           (lat < 0 && (month <= 3 || month >= 11));
-      return isRainySeason ? 
-        { desc: 'Partly cloudy with showers', icon: '🌦️' } :
-        { desc: 'Partly cloudy', icon: '⛅' };
-    }
-    
-    // Temperate regions
-    if (absLat < 60) {
-      const isWinter = (lat >= 0 && (month <= 2 || month >= 11)) ||
-                      (lat < 0 && month >= 5 && month <= 8);
-      return isWinter ?
-        { desc: 'Overcast', icon: '☁️' } :
-        { desc: 'Partly sunny', icon: '🌤️' };
-    }
-    
-    // Polar regions
-    return { desc: 'Cold and cloudy', icon: '☁️' };
+    return null;
   }
 
   getWeatherIconFromDescription(description) {
@@ -216,39 +151,6 @@ class WeatherManager {
     if (desc.includes('clear') || desc.includes('sunny')) return '☀️';
     if (desc.includes('partly')) return '⛅';
     return '🌤️';
-  }
-
-  getWeatherIcon(code) {
-    // Convert weather codes to emojis
-    if (typeof code === 'string') {
-      // wttr.in codes
-      const wttrCodes = {
-        '113': '☀️', '116': '⛅', '119': '☁️', '122': '☁️',
-        '143': '🌫️', '176': '🌦️', '179': '🌨️', '182': '🌧️',
-        '185': '🌧️', '200': '⛈️', '227': '🌨️', '230': '❄️',
-        '248': '🌫️', '260': '🌫️', '263': '🌦️', '266': '🌦️',
-        '281': '🌧️', '284': '🌧️', '293': '🌦️', '296': '🌦️',
-        '299': '🌧️', '302': '🌧️', '305': '🌧️', '308': '🌧️',
-        '311': '🌧️', '314': '🌧️', '317': '🌧️', '320': '🌨️',
-        '323': '🌨️', '326': '🌨️', '329': '❄️', '332': '❄️',
-        '335': '❄️', '338': '❄️', '350': '🌧️', '353': '🌦️',
-        '356': '🌧️', '359': '🌧️', '362': '🌨️', '365': '🌨️',
-        '368': '🌨️', '371': '❄️', '374': '🌧️', '377': '🌧️',
-        '386': '⛈️', '389': '⛈️', '392': '⛈️', '395': '❄️'
-      };
-      return wttrCodes[code] || '🌤️';
-    }
-    
-    // OpenWeatherMap codes
-    if (code >= 200 && code < 300) return '⛈️'; // Thunderstorm
-    if (code >= 300 && code < 400) return '🌦️'; // Drizzle
-    if (code >= 500 && code < 600) return '🌧️'; // Rain
-    if (code >= 600 && code < 700) return '❄️'; // Snow
-    if (code >= 700 && code < 800) return '🌫️'; // Atmosphere
-    if (code === 800) return '☀️'; // Clear
-    if (code > 800) return '☁️'; // Clouds
-    
-    return '🌤️'; // Default
   }
 
   displayWeatherInfo(weatherData) {

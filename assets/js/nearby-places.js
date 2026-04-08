@@ -110,31 +110,47 @@ class NearbyPlacesManager {
 
   async fetchNominatimNearby(lat, lng) {
     // Nominatim /search cannot do proximity amenity queries — use Overpass API instead.
-    // Overpass is completely free, no API key required, and natively supports
-    // "find amenity X within N metres of a coordinate" via the around: filter.
+    // Overpass is completely free, no API key, natively supports "around:" proximity filter.
     const amenities = ['restaurant', 'cafe', 'hospital', 'bank'];
     const nodeFilters = amenities
       .map(a => `node["amenity"="${a}"](around:1000,${lat},${lng});`)
       .join('\n');
     const query = `[out:json][timeout:10];\n(\n${nodeFilters}\n);\nout center 12;`;
 
-    const response = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `data=${encodeURIComponent(query)}`
-    });
+    // Two Overpass mirrors — try main, fall back to kumi.systems if 504
+    const endpoints = [
+      'https://overpass-api.de/api/interpreter',
+      'https://overpass.kumi.systems/api/interpreter'
+    ];
 
-    if (!response.ok) throw new Error(`Overpass ${response.status}`);
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `data=${encodeURIComponent(query)}`
+        });
 
-    const data = await response.json();
-    return (data.elements || [])
-      .map(el => ({
-        lat: el.lat ?? el.center?.lat,
-        lon: el.lon ?? el.center?.lon,
-        tags: el.tags || {}
-      }))
-      .filter(p => p.lat != null && p.lon != null)
-      .slice(0, 8);
+        if (!response.ok) {
+          console.warn(`Overpass ${endpoint} returned ${response.status}, trying next...`);
+          continue;
+        }
+
+        const data = await response.json();
+        return (data.elements || [])
+          .map(el => ({
+            lat: el.lat ?? el.center?.lat,
+            lon: el.lon ?? el.center?.lon,
+            tags: el.tags || {}
+          }))
+          .filter(p => p.lat != null && p.lon != null)
+          .slice(0, 8);
+      } catch (err) {
+        console.warn(`Overpass endpoint ${endpoint} failed:`, err);
+      }
+    }
+
+    throw new Error('All Overpass endpoints failed');
   }
 
   displayNearbyPlaces(places) {

@@ -18,6 +18,8 @@ const urlsToCache = [
   '/assets/js/ui-manager.js',
   '/assets/js/utils.js',
   '/assets/icons/favicon.svg',
+  '/assets/icons/icon-192.png',
+  '/assets/icons/icon-512.png',
   '/favicon.ico',
   'https://unpkg.com/leaflet/dist/leaflet.css',
   'https://unpkg.com/leaflet/dist/leaflet.js'
