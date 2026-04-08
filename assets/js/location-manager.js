@@ -83,7 +83,7 @@ class LocationManager {
         break;
     }
     
-    console.log(message);
+
     await this.fallbackToIPLocation();
   }
 
@@ -92,13 +92,13 @@ class LocationManager {
     if (window.chatManager) {
       window.chatManager.addMessage(message, 'ai');
     } else {
-      console.log(message);
+
     }
   }
 
   async autoDetectLocation() {
     if (!navigator.geolocation) {
-      console.log('Geolocation not supported, using IP location');
+
       await this.fallbackToIPLocation();
       return;
     }
@@ -121,7 +121,7 @@ class LocationManager {
         window.mapManager.showUserLocation(latitude, longitude, position.coords.accuracy);
       }
       
-      console.log('Using precise GPS location');
+
       
       setTimeout(() => {
         if (window.nearbyPlacesManager) {
@@ -129,7 +129,7 @@ class LocationManager {
         }
       }, 1000);
     } catch (error) {
-      console.log('Location access denied, using IP location');
+
       this.saveLocationPermission(false);
       await this.fallbackToIPLocation();
     }
@@ -159,7 +159,7 @@ class LocationManager {
       window.mapManager.centerOnLocation(13.0827, 80.2707, 10);
     }
     
-    console.log('Using default location: Chennai, India');
+
   }
 
   saveLocationPermission(granted) {
@@ -167,7 +167,7 @@ class LocationManager {
       localStorage.setItem('locationPermission', granted ? 'granted' : 'denied');
       localStorage.setItem('locationPermissionTime', Date.now().toString());
     } catch (error) {
-      console.log('Could not save location permission status');
+
     }
   }
 
@@ -181,7 +181,7 @@ class LocationManager {
         return hoursSince < 1; // Only skip for 1 hour, then try again
       }
     } catch (error) {
-      console.log('Could not check location permission status');
+
     }
     return false;
   }
@@ -233,11 +233,11 @@ window.addEventListener('DOMContentLoaded', () => {
       if (hoursSince > 1) {
         localStorage.removeItem('locationPermission');
         localStorage.removeItem('locationPermissionTime');
-        console.log('Cleared old location permission denial');
+
       }
     }
   } catch (error) {
-    console.log('Could not clear old permissions');
+
   }
   
   // Don't auto-detect location to avoid user gesture violation

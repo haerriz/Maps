@@ -91,7 +91,7 @@ class ThemeManager {
     try {
       localStorage.setItem('theme-preference', theme);
     } catch (error) {
-      console.log('Could not store theme preference');
+
     }
   }
 

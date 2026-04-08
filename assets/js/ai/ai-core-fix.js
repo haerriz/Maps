@@ -335,6 +335,6 @@ class AICorefix {
 window.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     window.aiCoreFix = new AICorefix();
-    console.log('🚀 AI Core Fix applied - AI should now respond intelligently!');
+
   }, 3000);
 });

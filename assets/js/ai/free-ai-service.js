@@ -17,7 +17,7 @@ class FreeAIService {
           return this.cleanResponse(response);
         }
       } catch (error) {
-        console.log(`Free AI API ${endpoint} failed:`, error);
+
       }
     }
 
@@ -57,7 +57,7 @@ class FreeAIService {
         return this.extractResponseFromAPI(data, endpoint);
       }
     } catch (error) {
-      console.log('Free API request failed:', error);
+
     }
 
     return null;
@@ -76,7 +76,7 @@ class FreeAIService {
         const response = await this.tryGPTEndpoint(endpoint, message, intent, entities, context);
         if (response) return response;
       } catch (error) {
-        console.log(`GPT4Free endpoint ${endpoint} failed:`, error);
+
       }
     }
 
@@ -116,7 +116,7 @@ class FreeAIService {
         return data.choices?.[0]?.message?.content?.trim();
       }
     } catch (error) {
-      console.log('GPT endpoint error:', error);
+
     }
 
     return null;

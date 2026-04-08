@@ -14,33 +14,33 @@ class LocationInitializer {
           window.mapManager.map.setView([userLocation.lat, userLocation.lng], CONFIG.DEFAULT_ZOOM);
         }
         
-        console.log(`Location initialized: ${userLocation.city}, ${userLocation.country}`);
+
         return userLocation;
       }
     } catch (error) {
-      console.warn('Could not initialize user location:', error);
+
     }
     
     // Fallback to Chennai, India if location detection fails
     CONFIG.DEFAULT_CENTER = [13.0827, 80.2707];
-    console.log('Using default location: Chennai, India');
+
     return null;
   }
   
   static async initializeWithBrowserLocation() {
     // Check if geolocation is available and not blocked
     if (!navigator.geolocation) {
-      console.log('Geolocation not supported, using IP location');
+
       return await LocationInitializer.initializeUserLocation();
     }
 
     // Always try geolocation, don't pre-check permissions
-    console.log('Attempting to get precise location...');
+
     
     try {
       return new Promise((resolve) => {
         const timeoutId = setTimeout(async () => {
-          console.log('Geolocation timeout, using IP location');
+
           const ipLocation = await LocationInitializer.initializeUserLocation();
           resolve(ipLocation);
         }, 3000);
@@ -60,12 +60,12 @@ class LocationInitializer {
               window.mapManager.map.setView([location.lat, location.lng], CONFIG.DEFAULT_ZOOM);
             }
             
-            console.log('Browser location initialized:', location);
+
             resolve(location);
           },
           async (error) => {
             clearTimeout(timeoutId);
-            console.log('Browser geolocation failed:', error.message);
+
             // Fallback to IP-based location
             const ipLocation = await LocationInitializer.initializeUserLocation();
             resolve(ipLocation);
@@ -78,7 +78,7 @@ class LocationInitializer {
         );
       });
     } catch (error) {
-      console.log('Geolocation error, using IP location:', error);
+
       return await LocationInitializer.initializeUserLocation();
     }
   }
@@ -88,7 +88,7 @@ class LocationInitializer {
 window.addEventListener('DOMContentLoaded', async () => {
   // Set default location (Chennai, India)
   CONFIG.DEFAULT_CENTER = [13.0827, 80.2707];
-  console.log('Map initialized with default location: Chennai, India');
+
 });
 
 // Export for use in other modules

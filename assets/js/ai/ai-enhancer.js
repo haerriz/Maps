@@ -213,6 +213,6 @@ class AIEnhancer {
 window.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     window.aiEnhancer = new AIEnhancer();
-    console.log('🚀 AI Enhancer loaded with knowledge base:', window.aiEnhancer.getKnowledgeStats());
+
   }, 1500);
 });

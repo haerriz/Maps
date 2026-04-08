@@ -227,7 +227,7 @@ class AIAnalyzer {
         break;
     }
     
-    console.log(`🔧 Applied improvement: ${improvement.type} for "${improvement.pattern}"`);
+
   }
 
   applySpecificResponseImprovement(improvement) {
@@ -296,12 +296,12 @@ class AIAnalyzer {
     const genericCount = recentResponses.filter(r => this.isGenericResponse(r.response)).length;
     
     if (genericCount > 5) {
-      console.warn('🚨 High number of generic responses detected. Applying emergency improvements...');
+
       this.applyEmergencyImprovements();
     }
     
     // Log statistics
-    console.log(`📊 AI Performance: ${recentResponses.length} recent responses, ${genericCount} generic (${Math.round(genericCount/recentResponses.length*100)}%)`);
+
   }
 
   applyEmergencyImprovements() {

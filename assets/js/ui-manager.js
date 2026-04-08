@@ -88,7 +88,7 @@ class UIManager {
 
   handleTravelModeChange() {
     const mode = document.getElementById('travelMode')?.value;
-    console.log('Travel mode changed to:', mode);
+
 
     // Update route type display
     const routeType = document.getElementById('routeType');
@@ -110,7 +110,7 @@ class UIManager {
       fuel: document.getElementById('includeFuel')?.checked
     };
     
-    console.log('Preferences updated:', preferences);
+
   }
 
   updateTourStats() {

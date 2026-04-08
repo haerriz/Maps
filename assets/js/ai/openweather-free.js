@@ -15,7 +15,7 @@ class FreeWeatherService {
         const weather = await this.tryWeatherAPI(endpoint, cityName);
         if (weather) return weather;
       } catch (error) {
-        console.log(`Weather API ${endpoint} failed:`, error);
+
       }
     }
 
@@ -50,7 +50,7 @@ class FreeWeatherService {
         }
       }
     } catch (error) {
-      console.log('Weather API request failed:', error);
+
     }
 
     return null;

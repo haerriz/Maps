@@ -23,11 +23,11 @@ class AIManager {
     try {
       // Step 1: Extract entities using multiple services
       const entities = await this.extractEntities(message);
-      console.log('Extracted entities:', entities);
+
 
       // Step 2: Detect intent using AI
       const intent = await this.detectIntent(message, entities);
-      console.log('Detected intent:', intent);
+
 
       // Store context for follow-up questions
       if (entities.cities.length > 0) {
@@ -40,7 +40,7 @@ class AIManager {
       this.cache.set(cacheKey, response);
       return response;
     } catch (error) {
-      console.error('AI Manager error:', error);
+
       return this.getFallbackResponse(message, context);
     }
   }
@@ -126,7 +126,7 @@ class AIManager {
         return hfResponse;
       }
     } catch (error) {
-      console.log('AI generation failed, using template');
+
     }
 
     // Fallback to template-based response
@@ -302,7 +302,7 @@ class AIManager {
         }
       }
     } catch (error) {
-      console.log('Enhanced response failed:', error);
+
     }
     
     return null;

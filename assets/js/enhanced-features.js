@@ -203,7 +203,7 @@ class EnhancedFeatures {
           </div>
         `;
       } catch (error) {
-        console.log('Timezone fetch failed for', stop.name);
+
       }
     }
     
@@ -242,7 +242,7 @@ class EnhancedFeatures {
         }
       }
     } catch (error) {
-      console.log('Wikipedia fetch failed');
+
     }
   }
 

@@ -23,13 +23,13 @@ class AppManager {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('assets/js/sw.js')
           .then(registration => {
-            console.log('SW registered: ', registration);
+
             if (window.chatManager) {
               window.chatManager.addMessage('📱 Offline mode enabled! Maps will work without internet.', 'ai');
             }
           })
           .catch(registrationError => {
-            console.log('SW registration failed: ', registrationError);
+
           });
       });
     }
@@ -96,7 +96,7 @@ class AppManager {
     // Initialize all manager modules
     window.addEventListener('load', () => {
       // Modules will auto-initialize when loaded
-      console.log('App Manager initialized');
+
     });
   }
 

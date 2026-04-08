@@ -8,7 +8,7 @@ class Utils {
       const data = await response.json();
       return data.rates;
     } catch (error) {
-      console.warn('Currency API unavailable, using fallback rates');
+
       return this.getFallbackRates();
     }
   }
@@ -26,7 +26,7 @@ class Utils {
         icon: this.getWeatherIcon(data.current_condition[0].weatherCode)
       };
     } catch (error) {
-      console.warn('Weather API unavailable');
+
       return null;
     }
   }
@@ -34,7 +34,7 @@ class Utils {
   // Get user location - returns default location (no IP APIs due to CORS)
   static async getUserLocation() {
     // Return default Chennai location since IP APIs have CORS issues
-    console.log('Using default location: Chennai, India');
+
     return {
       lat: 13.0827,
       lng: 80.2707,
@@ -63,7 +63,7 @@ class Utils {
         };
       });
     } catch (error) {
-      console.warn('Geocoding API unavailable');
+
       return [];
     }
   }
@@ -94,7 +94,7 @@ class Utils {
       }
       return null;
     } catch (error) {
-      console.warn('Routing API unavailable');
+
       return null;
     }
   }
@@ -109,7 +109,7 @@ class Utils {
         return data.rates;
       }
     } catch (error) {
-      console.warn('exchangerate-api.com failed, trying exchangerate.host');
+
     }
     
     try {
@@ -120,7 +120,7 @@ class Utils {
         return data.rates;
       }
     } catch (error) {
-      console.warn('exchangerate.host failed, trying floatrates');
+
     }
     
     try {
@@ -135,7 +135,7 @@ class Utils {
         return rates;
       }
     } catch (error) {
-      console.error('All currency APIs failed');
+
     }
     
     // Final fallback: return empty object to indicate failure

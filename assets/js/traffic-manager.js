@@ -49,7 +49,7 @@ class TrafficManager {
   }
 
   async enableTraffic() {
-    console.log('Traffic enabled - fetching real traffic data');
+
     
     // Get current map bounds for traffic data
     const map = window.mapManager?.getMap();
@@ -63,7 +63,7 @@ class TrafficManager {
   }
 
   disableTraffic() {
-    console.log('Traffic disabled');
+
     
     // Stop updates
     if (this.updateInterval) {
@@ -80,7 +80,7 @@ class TrafficManager {
       // Skip Overpass API due to timeouts, use road-based analysis directly
       this.analyzeRoadTraffic(bounds);
     } catch (error) {
-      console.warn('Traffic analysis failed:', error);
+
     }
   }
 
@@ -364,7 +364,7 @@ class TrafficManager {
       
       return { segments, totalDelay, avgSpeed };
     } catch (error) {
-      console.warn('Route traffic analysis failed:', error);
+
       return { segments: [], totalDelay: 0, avgSpeed: 50 };
     }
   }

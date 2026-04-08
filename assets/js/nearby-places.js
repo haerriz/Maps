@@ -82,18 +82,28 @@ class NearbyPlacesManager {
     this.lastApiCall = Date.now();
     const endpoints = [
       'https://overpass-api.de/api/interpreter',
-      'https://overpass.kumi.systems/api/interpreter'
+      'https://overpass.kumi.systems/api/interpreter',
+      'https://overpass.openstreetmap.ru/api/interpreter'
     ];
 
-    for (const endpoint of endpoints) {
+    // rotate: start from last known-working endpoint so 504 servers are skipped
+    const start = NearbyPlacesManager._endpointIndex || 0;
+    const ordered = [...endpoints.slice(start), ...endpoints.slice(0, start)];
+
+    for (const endpoint of ordered) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 8000);
       try {
         const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `data=${encodeURIComponent(query)}`
+          body: `data=${encodeURIComponent(query)}`,
+          signal: controller.signal
         });
-        if (!res.ok) { console.warn(`Overpass ${endpoint} → ${res.status}`); continue; }
+        clearTimeout(timer);
+        if (!res.ok) continue;
         const data = await res.json();
+        NearbyPlacesManager._endpointIndex = endpoints.indexOf(endpoint);
         return (data.elements || [])
           .map(el => ({
             lat: el.lat ?? el.center?.lat,
@@ -103,7 +113,7 @@ class NearbyPlacesManager {
           .filter(p => p.lat != null && p.lon != null)
           .slice(0, 20);
       } catch (err) {
-        console.warn(`Overpass ${endpoint} error:`, err);
+        clearTimeout(timer);
       }
     }
     throw new Error('All Overpass endpoints failed');

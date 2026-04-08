@@ -48,7 +48,7 @@ class TourManager {
           if (name) return name;
         }
       }
-    } catch (e) { console.warn('Nominatim reverse geocode failed:', e); }
+    } catch (e) { }
 
     // 2. Photon reverse geocode as fallback
     try {
@@ -63,7 +63,7 @@ class TourManager {
           if (name) return name;
         }
       }
-    } catch (e) { console.warn('Photon reverse geocode failed:', e); }
+    } catch (e) { }
 
     return this.stops.length === 0 ? 'Starting Point' : `Stop ${this.stops.length + 1}`;
   }
@@ -294,7 +294,7 @@ function exportTour() {
 
 function updateTravelMode() {
   const mode = document.getElementById('travelMode')?.value;
-  console.log('Travel mode changed to:', mode);
+
 }
 
 function setStartTime(time) {
@@ -322,7 +322,7 @@ function getWeatherInfo() {
 }
 
 function cacheCurrentArea() {
-  console.log('Caching current area for offline use');
+
 }
 
 function toggleMobileView() {

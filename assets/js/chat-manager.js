@@ -31,7 +31,7 @@ class ChatManager {
     const message = this.chatInput.value.trim();
     if (!message) return;
 
-    console.log('Sending message:', message);
+
     
     // Add user message
     this.addMessage(message, 'user');
@@ -47,10 +47,10 @@ class ChatManager {
   }
 
   addMessage(text, sender) {
-    console.log('Adding message:', { text, sender });
+
     
     if (!this.chatMessages) {
-      console.error('Chat messages container not found');
+
       return;
     }
 
@@ -74,11 +74,11 @@ class ChatManager {
     this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
 
     this.messages.push({ text, sender, timestamp: new Date() });
-    console.log('Message added successfully');
+
   }
 
   async generateAIResponse(userMessage) {
-    console.log('Generating AI response for:', userMessage);
+
     
     // Show typing indicator
     this.showTypingIndicator();
@@ -86,11 +86,11 @@ class ChatManager {
     try {
       // Use dynamic AI response
       const response = await this.getIntelligentResponse(userMessage.toLowerCase());
-      console.log('AI response:', response);
+
       this.hideTypingIndicator();
       this.addMessage(response, 'ai');
     } catch (error) {
-      console.log('AI generation error:', error);
+
       this.hideTypingIndicator();
       // Final fallback
       const fallbackResponse = this.getSmartFallback(userMessage, this.analyzeUserContext());
@@ -335,7 +335,7 @@ class ChatManager {
       const intent = await this.getAIIntent(message);
       if (intent) return intent;
     } catch (error) {
-      console.log('AI intent detection failed, using NLP fallback');
+
     }
     
     // Fallback to advanced NLP analysis
@@ -375,7 +375,7 @@ class ChatManager {
         return this.mapHuggingFaceIntent(topIntent);
       }
     } catch (error) {
-      console.log('Hugging Face API failed:', error);
+
     }
     
     return null;
@@ -616,13 +616,13 @@ class ChatManager {
   }
 
   async getAIResponse(userMessage) {
-    console.log('Getting AI response...');
+
     const context = this.analyzeUserContext();
-    console.log('User context:', context);
+
     
     // Use dynamic AI with real knowledge
     const response = this.getDynamicAIResponse(userMessage.toLowerCase(), context);
-    console.log('Generated response:', response);
+
     return response;
   }
 
@@ -672,12 +672,12 @@ class ChatManager {
       // Then get intent with entities
       const intent = await this.detectAdvancedIntent(message, entities);
       
-      console.log('AI Analysis:', { entities, intent });
+
       
       // Generate contextual response
       return await this.generateContextualResponse(message, intent, entities, context);
     } catch (error) {
-      console.log('Dynamic AI failed:', error);
+
       return this.getSmartFallback(message, context);
     }
   }
@@ -698,7 +698,7 @@ class ChatManager {
         return data[0]?.language || 'en';
       }
     } catch (error) {
-      console.log('Language detection failed:', error);
+
     }
     
     return 'en';
@@ -720,7 +720,7 @@ class ChatManager {
         return data.map(item => item.word).slice(0, 5);
       }
     } catch (error) {
-      console.log('Keyword extraction failed:', error);
+
     }
     
     return [];
@@ -767,7 +767,7 @@ class ChatManager {
         }
       }
     } catch (error) {
-      console.log('AI text generation failed:', error);
+
     }
     
     return null;
@@ -870,7 +870,7 @@ class ChatManager {
       
       return aiIntent;
     } catch (error) {
-      console.log('Advanced intent detection failed:', error);
+
       return 'general';
     }
   }
@@ -890,7 +890,7 @@ class ChatManager {
         return data[0];
       }
     } catch (error) {
-      console.log('Sentiment analysis failed:', error);
+
     }
     
     return null;
@@ -938,7 +938,7 @@ class ChatManager {
           return this.getSmartFallback(message, context);
       }
     } catch (error) {
-      console.log('Contextual response failed:', error);
+
       return this.getSmartFallback(message, context);
     }
   }
@@ -964,7 +964,7 @@ class ChatManager {
         return `${city}: ${wikiInfo.extract.substring(0, 200)}... Want to know more? Add ${city} to your trip!`;
       }
     } catch (error) {
-      console.log('Wikipedia API failed for', city);
+
     }
     
     // Fallback to basic info
@@ -980,7 +980,7 @@ class ChatManager {
         return await response.json();
       }
     } catch (error) {
-      console.log('Wikipedia fetch failed:', error);
+
     }
     return null;
   }
@@ -994,7 +994,7 @@ class ChatManager {
         return `In ${city}, you should visit: ${attractionList}. Add ${city} to your trip and I'll help you plan the perfect route to these attractions!`;
       }
     } catch (error) {
-      console.log('Attractions API failed for', city);
+
     }
     
     // Fallback
@@ -1026,7 +1026,7 @@ class ChatManager {
         return data.elements.map(el => ({ name: el.tags.name })).slice(0, 5);
       }
     } catch (error) {
-      console.log('Overpass API failed:', error);
+
     }
     
     return null;
@@ -1047,7 +1047,7 @@ class ChatManager {
         }
       }
     } catch (error) {
-      console.log('Distance calculation failed:', error);
+
     }
     
     // Cannot calculate distance without coordinates — return null so caller
@@ -1067,7 +1067,7 @@ class ChatManager {
         return { lat, lng };
       }
     } catch (error) {
-      console.log('Geocoding failed:', error);
+
     }
     
     return null;
@@ -1110,7 +1110,7 @@ function sendQuickMessage(message) {
 
 function toggleAIChat() {
   // No longer needed as chat is always visible in sidebar
-  console.log('Chat is now integrated in sidebar');
+
 }
 
 // Initialize chat manager

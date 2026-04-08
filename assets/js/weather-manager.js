@@ -61,7 +61,7 @@ class WeatherManager {
         icon: this.wmoCodeToIcon(c.weather_code)
       };
     } catch (error) {
-      console.warn('Open-Meteo failed for', locationName, error);
+
       // Try weather.gov as fallback for US locations
       return await this.fetchWeatherGovFallback(lat, lng, locationName);
     }
@@ -108,7 +108,7 @@ class WeatherManager {
           if (weather) { this.displayWeatherInfo([weather]); return; }
         }
       }
-    } catch (e) { console.warn('Weather geocode failed:', e); }
+    } catch (e) { }
     if (window.chatManager) {
       window.chatManager.addMessage(`Could not fetch weather for ${locationName}. Try adding it as a map stop first.`, 'ai');
     }
@@ -137,7 +137,7 @@ class WeatherManager {
         }
       }
     } catch (error) {
-      console.warn('Weather.gov fallback failed:', error);
+
     }
     return null;
   }

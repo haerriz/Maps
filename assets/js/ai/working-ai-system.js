@@ -9,7 +9,7 @@ class WorkingAISystem {
   init() {
     // Override the broken AI system completely
     this.overrideChatManager();
-    console.log('✅ Working AI System initialized - no CORS issues!');
+
   }
 
   overrideChatManager() {
@@ -22,7 +22,7 @@ class WorkingAISystem {
           return this.processMessage(message);
         };
         
-        console.log('✅ Chat Manager overridden with working AI system');
+
       } else {
         setTimeout(checkChatManager, 100);
       }
@@ -202,7 +202,7 @@ class WorkingAISystem {
         return `${city.name}: ${wikiInfo.extract.substring(0, 200)}...\n\nTop attractions: ${city.attractions.slice(0, 3).join(', ')}.\nMust-try food: ${city.food.slice(0, 3).join(', ')}.`;
       }
     } catch (error) {
-      console.log('Wikipedia fetch failed, using local data');
+
     }
     
     return this.getCityInfo(cityKey);
@@ -229,7 +229,7 @@ class WorkingAISystem {
         return await response.json();
       }
     } catch (error) {
-      console.log('Wikipedia API failed:', error);
+
     }
     return null;
   }

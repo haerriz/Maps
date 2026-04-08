@@ -54,7 +54,7 @@ class NavigationManager {
       this.speakInstruction(this.navigationSteps[0]);
 
     } catch (error) {
-      console.error('Navigation start failed:', error);
+
       alert('Navigation failed to start. Please try again.');
     }
   }
@@ -91,7 +91,7 @@ class NavigationManager {
         return { steps, totalDistance: route.distance, totalDuration: route.duration };
       }
     } catch (error) {
-      console.error('Route calculation failed:', error);
+
     }
     return null;
   }
@@ -328,7 +328,7 @@ class NavigationManager {
         break;
     }
     
-    console.error(message);
+
     this.showNavigationError(message);
   }
 
@@ -466,7 +466,7 @@ class NavigationManager {
           this.currentHeading
         );
       } catch (error) {
-        console.warn('3D camera update failed:', error);
+
       }
     }
   }
@@ -500,7 +500,7 @@ class NavigationManager {
         }
       }
     } catch (error) {
-      console.error('Rerouting failed:', error);
+
     }
   }
 

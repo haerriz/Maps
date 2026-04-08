@@ -22,7 +22,7 @@ class WikipediaService {
         return summary;
       }
     } catch (error) {
-      console.log('Wikipedia API failed:', error);
+
     }
 
     const fallback = this.getOfflineCityInfo(cityName);
@@ -43,7 +43,7 @@ class WikipediaService {
         };
       }
     } catch (error) {
-      console.log('Wikipedia summary failed:', error);
+
     }
     return null;
   }
@@ -104,7 +104,7 @@ class WikipediaService {
         return data.pages?.map(page => page.title) || [];
       }
     } catch (error) {
-      console.log('Wikipedia geosearch failed:', error);
+
     }
 
     const cityInfo = this.getOfflineCityInfo(cityName);

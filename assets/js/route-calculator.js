@@ -49,7 +49,7 @@ class RouteCalculator {
       if (!data.routes || data.routes.length === 0) return null;
       return this._processRoute(data.routes[0]);
     } catch (error) {
-      console.error('OSRM route calculation failed:', error);
+
       return null;
     }
   }
@@ -70,7 +70,7 @@ class RouteCalculator {
       });
 
       if (!response.ok) {
-        console.warn('ORS failed, falling back to OSRM:', response.status);
+
         return null;
       }
 
@@ -91,7 +91,7 @@ class RouteCalculator {
         engine:       'OpenRouteService'
       };
     } catch (error) {
-      console.warn('ORS error, falling back to OSRM:', error);
+
       return null;
     }
   }

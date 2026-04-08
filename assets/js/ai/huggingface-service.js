@@ -41,7 +41,7 @@ class HuggingFaceService {
         return { intent, confidence: data.scores[0] };
       }
     } catch (error) {
-      console.log('HuggingFace intent classification failed:', error);
+
     }
 
     return { intent: 'general', confidence: 0.3 };
@@ -76,7 +76,7 @@ class HuggingFaceService {
         return this.parseNERResults(data);
       }
     } catch (error) {
-      console.log('HuggingFace NER failed:', error);
+
     }
 
     return { cities: [], places: [], keywords: [] };
@@ -123,7 +123,7 @@ class HuggingFaceService {
         return this.extractResponse(data[0]?.generated_text, prompt);
       }
     } catch (error) {
-      console.log('HuggingFace generation failed:', error);
+
     }
 
     return null;
@@ -177,7 +177,7 @@ class HuggingFaceService {
         return data.answer;
       }
     } catch (error) {
-      console.log('HuggingFace QA failed:', error);
+
     }
 
     return null;

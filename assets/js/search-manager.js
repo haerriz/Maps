@@ -43,7 +43,7 @@ class SearchManager {
       const results = await Utils.geocodeLocation(query);
       this.displaySuggestions(results);
     } catch (error) {
-      console.warn('Search failed:', error);
+
       this.hideSuggestions();
     }
   }

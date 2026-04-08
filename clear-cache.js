@@ -6,7 +6,7 @@ const CACHE_KEY = 'haerriz_cache_cleared';
 const cacheCleared = localStorage.getItem(CACHE_KEY);
 
 if (cacheCleared !== CACHE_VERSION) {
-  console.log('Clearing old caches...');
+
   
   // Clear service workers
   if ('serviceWorker' in navigator) {

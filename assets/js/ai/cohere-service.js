@@ -17,7 +17,7 @@ class CohereService {
       const classification = await this.classifyWithAlternatives(message);
       if (classification) return classification;
     } catch (error) {
-      console.log('Cohere alternatives failed:', error);
+
     }
 
     // Fallback to rule-based classification

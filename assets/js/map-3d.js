@@ -18,7 +18,7 @@ class Map3DManager {
     this.is3DMode = true;
     this._apply3DWrapper();
     this._injectRouteStyle();
-    console.log('3D navigation mode enabled');
+
   }
 
   disable3DMode() {
@@ -26,7 +26,7 @@ class Map3DManager {
     this.is3DMode = false;
     this._reset3DWrapper();
     this._removeAllInjectedStyles();
-    console.log('3D navigation mode disabled');
+
   }
 
   updateBearing(heading) {

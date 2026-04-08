@@ -5,19 +5,19 @@ class APITester {
   }
 
   async testAllAPIs() {
-    console.log('🧪 Testing All APIs...');
+
     
     await this.testHuggingFace();
     await this.testWikipedia();
     await this.testWeather();
     await this.testGeocoding();
     
-    console.log('📊 API Test Results:', this.results);
+
     return this.results;
   }
 
   async testHuggingFace() {
-    console.log('🤖 Testing Hugging Face APIs...');
+
     
     // Test Intent Classification
     try {
@@ -34,15 +34,15 @@ class APITester {
 
       if (intentResponse.ok) {
         const intentData = await intentResponse.json();
-        console.log('✅ HuggingFace Intent Classification:', intentData);
+
         this.results.huggingface_intent = { status: 'success', data: intentData };
       } else {
         const errorText = await intentResponse.text();
-        console.log('❌ HuggingFace Intent Failed:', intentResponse.status, errorText);
+
         this.results.huggingface_intent = { status: 'failed', error: errorText, code: intentResponse.status };
       }
     } catch (error) {
-      console.log('❌ HuggingFace Intent Error:', error);
+
       this.results.huggingface_intent = { status: 'error', error: error.message };
     }
 
@@ -59,41 +59,41 @@ class APITester {
 
       if (genResponse.ok) {
         const genData = await genResponse.json();
-        console.log('✅ HuggingFace Text Generation:', genData);
+
         this.results.huggingface_generation = { status: 'success', data: genData };
       } else {
         const errorText = await genResponse.text();
-        console.log('❌ HuggingFace Generation Failed:', genResponse.status, errorText);
+
         this.results.huggingface_generation = { status: 'failed', error: errorText, code: genResponse.status };
       }
     } catch (error) {
-      console.log('❌ HuggingFace Generation Error:', error);
+
       this.results.huggingface_generation = { status: 'error', error: error.message };
     }
   }
 
   async testWikipedia() {
-    console.log('📚 Testing Wikipedia API...');
+
     
     try {
       const response = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/Paris');
       
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ Wikipedia API:', data.extract.substring(0, 100) + '...');
+
         this.results.wikipedia = { status: 'success', extract: data.extract };
       } else {
-        console.log('❌ Wikipedia Failed:', response.status);
+
         this.results.wikipedia = { status: 'failed', code: response.status };
       }
     } catch (error) {
-      console.log('❌ Wikipedia Error:', error);
+
       this.results.wikipedia = { status: 'error', error: error.message };
     }
   }
 
   async testWeather() {
-    console.log('🌤️ Testing Weather APIs...');
+
     
     // Test wttr.in
     try {
@@ -103,15 +103,15 @@ class APITester {
         const data = await response.json();
         const current = data.current_condition?.[0];
         if (current) {
-          console.log('✅ Weather API (wttr.in):', `${current.temp_C}°C, ${current.weatherDesc?.[0]?.value}`);
+
           this.results.weather_wttr = { status: 'success', temp: current.temp_C, condition: current.weatherDesc?.[0]?.value };
         }
       } else {
-        console.log('❌ Weather API Failed:', response.status);
+
         this.results.weather_wttr = { status: 'failed', code: response.status };
       }
     } catch (error) {
-      console.log('❌ Weather API Error:', error);
+
       this.results.weather_wttr = { status: 'error', error: error.message };
     }
 
@@ -123,21 +123,21 @@ class APITester {
         const data = await response.json();
         const current = data.current_weather;
         if (current) {
-          console.log('✅ Weather API (Open-Meteo):', `${current.temperature}°C, Wind: ${current.windspeed} km/h`);
+
           this.results.weather_openmeteo = { status: 'success', temp: current.temperature, wind: current.windspeed };
         }
       } else {
-        console.log('❌ Open-Meteo Failed:', response.status);
+
         this.results.weather_openmeteo = { status: 'failed', code: response.status };
       }
     } catch (error) {
-      console.log('❌ Open-Meteo Error:', error);
+
       this.results.weather_openmeteo = { status: 'error', error: error.message };
     }
   }
 
   async testGeocoding() {
-    console.log('🗺️ Testing Geocoding APIs...');
+
     
     try {
       // Photon is CORS-safe, no rate limit, same OSM data
@@ -146,22 +146,22 @@ class APITester {
       if (response.ok) {
         const data = await response.json();
         if (data.features && data.features.length > 0) {
-          console.log('✅ Photon API:', data.features[0].properties.name);
+
           this.results.geocoding = { status: 'success', location: data.features[0].properties.name };
         }
       } else {
-        console.log('❌ Photon Failed:', response.status);
+
         this.results.geocoding = { status: 'failed', code: response.status };
       }
     } catch (error) {
-      console.log('❌ Photon Error:', error);
+
       this.results.geocoding = { status: 'error', error: error.message };
     }
   }
 
   // Test specific AI functionality
   async testAIFunctionality() {
-    console.log('🧠 Testing AI Functionality...');
+
     
     const testCases = [
       { input: 'weather in London', expected: 'weather info' },
@@ -174,10 +174,10 @@ class APITester {
         if (window.aiManager) {
           const context = { stopCount: 0, hasRoute: false };
           const response = await window.aiManager.processMessage(testCase.input, context);
-          console.log(`🧪 AI Test "${testCase.input}":`, response.substring(0, 100) + '...');
+
         }
       } catch (error) {
-        console.log(`❌ AI Test "${testCase.input}" failed:`, error);
+
       }
     }
   }
@@ -196,7 +196,7 @@ class APITester {
       recommendations: this.getRecommendations()
     };
 
-    console.log('📋 API Test Report:', report);
+
     return report;
   }
 

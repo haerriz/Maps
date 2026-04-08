@@ -15,7 +15,7 @@ class OpenAIService {
         const response = await this.tryEndpoint(endpoint, message, intent, entities, context);
         if (response) return response;
       } catch (error) {
-        console.log(`OpenAI service ${endpoint} failed:`, error);
+
       }
     }
 
@@ -55,7 +55,7 @@ class OpenAIService {
         return data.choices?.[0]?.message?.content?.trim();
       }
     } catch (error) {
-      console.log('OpenAI endpoint error:', error);
+
     }
 
     return null;

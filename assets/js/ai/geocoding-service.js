@@ -124,7 +124,7 @@ class GeocodingService {
           return cityData;
         }
       } catch (error) {
-        console.log(`Geocoding API ${api} failed for ${cityName}:`, error);
+
       }
     }
 

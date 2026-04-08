@@ -197,7 +197,7 @@ function addCurrentLocationAsStop() {
   if (window.locationManager) {
     window.locationManager.useMyLocation();
   } else {
-    console.log('Location manager not available');
+
   }
 }
 

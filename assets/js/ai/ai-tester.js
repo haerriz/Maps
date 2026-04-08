@@ -38,7 +38,7 @@ class AITester {
   }
 
   async runAllTests() {
-    console.log('🧪 Starting AI Chat Analysis...');
+
     
     for (const testCase of this.testCases) {
       await this.runTest(testCase);
@@ -48,7 +48,7 @@ class AITester {
     this.generateFixes();
     this.applyFixes();
     
-    console.log('✅ AI Chat Analysis Complete!');
+
     return this.generateReport();
   }
 
@@ -80,12 +80,12 @@ class AITester {
         this.issues.push(result);
       }
       
-      console.log(`${result.passed ? '✅' : '❌'} ${testCase.description}: ${testCase.input}`);
-      console.log(`   Intent: ${intent} | Entities: ${JSON.stringify(entities)}`);
-      console.log(`   Response: ${response.substring(0, 100)}...`);
+
+
+
       
     } catch (error) {
-      console.error(`❌ Test failed for "${testCase.input}":`, error);
+
       this.issues.push({
         input: testCase.input,
         error: error.message,
@@ -122,7 +122,7 @@ class AITester {
   }
 
   analyzeResults() {
-    console.log('🔍 Analyzing Issues...');
+
     
     const issueTypes = {
       cityRecognition: [],
@@ -149,12 +149,12 @@ class AITester {
       }
     });
     
-    console.log('📊 Issue Analysis:', issueTypes);
+
     this.issueTypes = issueTypes;
   }
 
   generateFixes() {
-    console.log('🔧 Generating Fixes...');
+
     
     // Fix 1: Expand city database
     if (this.issueTypes.cityRecognition.length > 0) {
@@ -194,7 +194,7 @@ class AITester {
   }
 
   applyFixes() {
-    console.log('🚀 Applying Fixes...');
+
     
     this.fixes.forEach(fix => {
       switch (fix.type) {
@@ -250,7 +250,7 @@ class AITester {
       };
     }
     
-    console.log('✅ Applied city database fix');
+
   }
 
   applyIntentDetectionFix(fix) {
@@ -281,7 +281,7 @@ class AITester {
       };
     }
     
-    console.log('✅ Applied intent detection fix');
+
   }
 
   applyResponseTemplatesFix(fix) {
@@ -319,7 +319,7 @@ class AITester {
       };
     }
     
-    console.log('✅ Applied response templates fix');
+
   }
 
   generateReport() {
@@ -332,7 +332,7 @@ class AITester {
       summary: `${this.testCases.length - this.issues.length}/${this.testCases.length} tests passed`
     };
     
-    console.log('📋 Final Report:', report);
+
     return report;
   }
 }
@@ -354,8 +354,8 @@ window.testAI = async function(input) {
   if (window.aiTester) {
     const context = { stopCount: 0, hasRoute: false, hasStops: false, trafficEnabled: false };
     const response = await window.aiManager.processMessage(input, context);
-    console.log(`Input: ${input}`);
-    console.log(`Response: ${response}`);
+
+
     return response;
   }
 };
